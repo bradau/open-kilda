@@ -53,7 +53,7 @@ public class StatsTopology extends AbstractTopology {
                 config.getWorkers());
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         try {
             LaunchEnvironment env = new LaunchEnvironment(args);
             (new StatsTopology(env)).setup();

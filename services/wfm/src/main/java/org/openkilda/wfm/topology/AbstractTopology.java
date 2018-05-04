@@ -24,6 +24,7 @@ import org.openkilda.wfm.PropertiesReader;
 import org.openkilda.wfm.error.StreamNameCollisionException;
 import org.openkilda.wfm.ctrl.RouteBolt;
 import org.openkilda.wfm.kafka.CustomNamedSubscription;
+import org.openkilda.wfm.topology.event.OFEventWFMTopology;
 import org.openkilda.wfm.topology.utils.HealthCheckBolt;
 import org.openkilda.wfm.topology.utils.KafkaRecordTranslator;
 
@@ -270,5 +271,14 @@ public abstract class AbstractTopology implements Topology {
 
     protected String makeKafkaGroupName(String spoutId) {
         return String.format("%s__%s", getTopologyName(), spoutId);
+    }
+
+    public static void main(String[] args) {
+        try {
+            LaunchEnvironment env = new LaunchEnvironment(args);
+            (new OFEventWFMTopology(env)).setup();
+        } catch (Exception e) {
+            System.exit(handleLaunchException(e));
+        }
     }
 }
