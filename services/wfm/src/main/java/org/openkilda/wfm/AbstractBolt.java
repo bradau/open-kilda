@@ -16,6 +16,7 @@
 
 package org.openkilda.wfm;
 
+import lombok.extern.log4j.Log4j2;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.base.BaseRichBolt;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
+@Log4j2
 public abstract class AbstractBolt extends BaseRichBolt {
     private static final Logger logger = LoggerFactory.getLogger(AbstractBolt.class);
 
@@ -42,6 +44,12 @@ public abstract class AbstractBolt extends BaseRichBolt {
     }
 
     protected abstract void handleInput(Tuple input);
+
+    protected void unhandledInput(Tuple input) {
+        log.error(
+                "{} is unable to hadle input tuple from {} stream {} - have topology being build correctly?",
+                getClass().getName(), input.getSourceComponent(), input.getSourceStreamId());
+    }
 
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {

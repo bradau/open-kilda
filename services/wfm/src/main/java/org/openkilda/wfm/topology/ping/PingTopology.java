@@ -22,14 +22,7 @@ import org.openkilda.wfm.LaunchEnvironment;
 import org.openkilda.wfm.NameCollisionException;
 import org.openkilda.wfm.topology.AbstractTopology;
 import org.openkilda.wfm.topology.Topology;
-import org.openkilda.wfm.topology.ping.bolt.FloodlightDecoder;
-import org.openkilda.wfm.topology.ping.bolt.FloodlightEncoder;
-import org.openkilda.wfm.topology.ping.bolt.FlowKeeper;
-import org.openkilda.wfm.topology.ping.bolt.MonotonicTick;
-import org.openkilda.wfm.topology.ping.bolt.PingManager;
-import org.openkilda.wfm.topology.ping.bolt.PingTick;
-import org.openkilda.wfm.topology.ping.bolt.RequestProducer;
-import org.openkilda.wfm.topology.ping.bolt.ResponseConsumer;
+import org.openkilda.wfm.topology.ping.bolt.*;
 
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
@@ -37,6 +30,7 @@ import org.apache.storm.topology.TopologyBuilder;
 public class PingTopology extends AbstractTopology {
     public static final String TOPOLOGY_ID = "flowping";
 
+    public static final String SPOUT_FLOW_SYNC_ID = "flow.sync.in";
     public static final String SPOUT_FLOODLIGHT_IN_ID = "floodlight.kafka.in";
     public static final String BOLT_FLOODLIGHT_OUT_ID = "floodlight.kafka.out";
 
@@ -51,6 +45,7 @@ public class PingTopology extends AbstractTopology {
         topology.setBolt(FloodlightDecoder.BOLT_ID, new FloodlightDecoder());
         attachPingTick(topology);
         attachMonotonicTick(topology);
+        attachFlowUpdateObserver(topology);
         attachFlowKeeper(topology);
         topology.setBolt(PingManager.BOLT_ID, new PingManager());
         topology.setBolt(RequestProducer.BOLT_ID, new RequestProducer());
@@ -68,9 +63,14 @@ public class PingTopology extends AbstractTopology {
         topology.setBolt(MonotonicTick.BOLT_ID, new MonotonicTick());
     }
 
-    private void attachFlowKeeper(TopologyBuilder topology) {
+    private void attachFlowUpdateObserver(TopologyBuilder topology) {
         Auth pceAuth = config.getPathComputerAuth();
-        topology.setBolt(FlowKeeper.BOLT_ID, new FlowKeeper(pceAuth))
+        topology.setBolt(FlowUpdateObserver.BOLT_ID, new FlowUpdateObserver(pceAuth))
+                .allGrouping(MonotonicTick.BOLT_ID);
+    }
+
+    private void attachFlowKeeper(TopologyBuilder topology) {
+        topology.setBolt(FlowKeeper.BOLT_ID, new FlowKeeper())
                 .allGrouping(PingTick.BOLT_ID);
     }
 

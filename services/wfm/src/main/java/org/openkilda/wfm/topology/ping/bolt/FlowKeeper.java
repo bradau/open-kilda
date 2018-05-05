@@ -42,39 +42,18 @@ public class FlowKeeper extends AbstractBolt {
 
     private final HashMap<String, BiFlow> flows = new HashMap<>();
 
-    private final Auth pceAuth;
-
-    public FlowKeeper(Auth pceAuth) {
-        this.pceAuth = pceAuth;
-    }
-
     @Override
     protected void handleInput(Tuple input) {
         String source = input.getSourceComponent();
 
         if (PingTick.BOLT_ID.equals(source)) {
-            true;
         } else {
-            log.warn("Unexpected input from {} - is topology changes without code change?", source);
-        }
-    }
-
-    private void initialFetch() {
-        PathComputerFlowFetcher flowFetcher = new PathComputerFlowFetcher(pceAuth.connect());
-
-        for (BiFlow biFlow : flowFetcher.getFlows()) {
-            flows.put(biFlow.getFlowId(), biFlow);
+            unhandledInput(input);
         }
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputManager) {
         outputManager.declareStream(STREAM_PING_ID, STREAM_PING_FIELDS);
-    }
-
-    @Override
-    public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-        super.prepare(stormConf, context, collector);
-        initialFetch();
     }
 }
