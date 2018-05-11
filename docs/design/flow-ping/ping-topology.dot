@@ -1,0 +1,32 @@
+digraph PingTopology {
+  node [shape=box]
+
+  FlowSync [shape=hexagon]
+  FLInput [shape=hexagon]
+
+  PingTick [shape=ellipse]
+  MonotonicTick [shape=ellipse]
+  
+  FLOutput [shape=octagon]
+  FlowManagement [shape=octagon]
+
+  FlowSync -> SyncDecoder
+  SyncDecoder -> FlowSyncObserver
+  FlowSyncObserver -> FlowRouter [label="flows"]
+  
+  FlowRouter -> FlowManager [label="grouping"]
+  FlowManager -> PingRouter [label="ping init"]
+  PingRouter -> PingManager [label="grouping"]
+  FlowManager -> FlowManagementEncoding [label="flow management"]
+  FlowManagementEncoding -> FlowManagement
+
+  FLInput -> FLDecoder
+  FLDecoder -> PingRouter  [label="ping response"]
+  PingManager -> FlowRouter  [label="ping result/timeout"]
+  PingManager -> FLEncoder  [label="ping request"]
+  FLEncoder -> FLOutput
+
+  PingTick -> FlowManager  [label="ping cycle"]
+  MonotonicTick -> FlowSyncObserver  [label="initial load"]
+  MonotonicTick -> PingManager  [label="timeout"]
+}
