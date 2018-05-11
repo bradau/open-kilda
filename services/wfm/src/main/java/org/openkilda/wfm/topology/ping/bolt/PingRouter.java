@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-package org.openkilda.wfm.topology.ping;
+package org.openkilda.wfm.topology.ping.bolt;
 
-import org.openkilda.wfm.AbstractBolt;
-
-public class FlowRouter extends AbstractBolt {
-    public static final String BOLT_ID = "flow.router";
-
+public class PingRouter extends PingRouter {
+    public static final String BOLT_ID = "ping.router";
 }

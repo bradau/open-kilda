@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Log4j2
-public class FlowKeeper extends AbstractBolt {
+public class FlowManager extends AbstractBolt {
     public static final String BOLT_ID = "flow_keeper";
 
     public static final String FIELD_ID_FLOW_ID = "flow_id";

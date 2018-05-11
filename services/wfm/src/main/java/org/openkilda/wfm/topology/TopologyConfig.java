@@ -49,6 +49,7 @@ public class TopologyConfig {
     private String kafkaTopoEngTopic;
     private String kafkaTopoDiscoTopic;
     private String kafkaTopoCacheTopic;
+    private String kafkaFlowSyncTopic;
 
     private String openTsDBHosts;
     private Integer openTsdbTimeout;
@@ -112,6 +113,7 @@ public class TopologyConfig {
         kafkaTopoCacheTopic = config.getString("kafka.topic.topo.cache");
         kafkaTopoDiscoTopic = config.getString("kafka.topic.topo.disco");
         kafkaTopoEngTopic = config.getString("kafka.topic.topo.eng");
+        kafkaFlowSyncTopic = config.getString("kafka.topic.flow.sync");
 
         openTsDBHosts = config.getString("opentsdb.hosts");
         openTsdbTimeout = (int) (config.getFloat("opentsdb.timeout") * 1000);

@@ -30,7 +30,7 @@ import org.openkilda.wfm.share.utils.PathComputerFlowFetcher;
 import java.util.LinkedList;
 import java.util.Map;
 
-public class FlowUpdateObserver extends AbstractBolt {
+public class FlowSyncObserver extends AbstractBolt {
     public static final String BOLT_ID = "flow_update_observer";
 
     public static final String FIELD_ID_FLOW_ID = "flow_id";
@@ -48,7 +48,7 @@ public class FlowUpdateObserver extends AbstractBolt {
     private final LinkedList<BiFlow> pending = new LinkedList<>();
     private final Auth pceAuth;
 
-    public FlowUpdateObserver(Auth pceAuth) {
+    public FlowSyncObserver(Auth pceAuth) {
         this.pceAuth = pceAuth;
     }
 
