@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Telstra Open Source
+ * Copyright 2018 Telstra Open Source
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,7 @@ import org.apache.storm.kafka.spout.KafkaSpout;
 import org.apache.storm.topology.TopologyBuilder;
 
 public class PingTopology extends AbstractTopology {
-    public static final String TOPOLOGY_ID = "flowping";
-
-    public static final String SPOUT_FLOW_SYNC_ID = "flow.sync.in";
-    public static final String SPOUT_FLOODLIGHT_IN_ID = "floodlight.kafka.in";
-    public static final String BOLT_FLOODLIGHT_OUT_ID = "floodlight.kafka.out";
+    public static final String TOPOLOGY_ID = "flow_ping";
 
     protected PingTopology(LaunchEnvironment env) throws ConfigurationException {
         super(env);
@@ -43,33 +39,33 @@ public class PingTopology extends AbstractTopology {
         TopologyBuilder topology = new TopologyBuilder();
 
         attachFlowSync(topology);
-        attachFloodlightInput(topology);
-
-        attachPingTick(topology);
-        attachMonotonicTick(topology);
-
-        attachFlowSyncDecoder(topology);
-        topology.setBolt(FloodlightDecoder.BOLT_ID, new FloodlightDecoder());
-        attachFlowUpdateObserver(topology);
-        attachFlowKeeper(topology);
-        topology.setBolt(PingManager.BOLT_ID, new PingManager());
-        topology.setBolt(RequestProducer.BOLT_ID, new RequestProducer());
-        topology.setBolt(ResponseConsumer.BOLT_ID, new ResponseConsumer());
-        topology.setBolt(FloodlightEncoder.BOLT_ID, new FloodlightEncoder());
+//        attachFloodlightInput(topology);
+//
+//        attachPingTick(topology);
+//        attachMonotonicTick(topology);
+//
+//        attachFlowSyncDecoder(topology);
+//        topology.setBolt(FloodlightDecoder.BOLT_ID, new FloodlightDecoder());
+//        attachFlowUpdateObserver(topology);
+//        attachFlowKeeper(topology);
+//        topology.setBolt(PingManager.BOLT_ID, new PingManager());
+//        topology.setBolt(RequestProducer.BOLT_ID, new RequestProducer());
+//        topology.setBolt(ResponseConsumer.BOLT_ID, new ResponseConsumer());
+//        topology.setBolt(FloodlightEncoder.BOLT_ID, new FloodlightEncoder());
 
         return topology.createTopology();
     }
 
     private void attachFlowSync(TopologyBuilder topology) {
-        KafkaSpout<String, String> spout = createKafkaSpout(
-                config.getKafkaFlowSyncTopic(), SPOUT_FLOW_SYNC_ID);
-        topology.setSpout(SPOUT_FLOW_SYNC_ID, spout);
+        String spoutId = ComponentId.FLOW_SYNC_IN.toString();
+        KafkaSpout<String, String> spout = createKafkaSpout(config.getKafkaFlowSyncTopic(), spoutId);
+        topology.setSpout(spoutId, spout);
     }
 
     private void attachFloodlightInput(TopologyBuilder topology) {
-        KafkaSpout<String, String> spout = createKafkaSpout(
-                config.getKafkaSpeakerTopic(), SPOUT_FLOODLIGHT_IN_ID);
-        topology.setSpout(SPOUT_FLOODLIGHT_IN_ID, spout);
+        String spoutId = ComponentId.FLOODLIGHT_IN.toString();
+        KafkaSpout<String, String> spout = createKafkaSpout(config.getKafkaSpeakerTopic(), spoutId);
+        topology.setSpout(spoutId, spout);
     }
 
     private void attachPingTick(TopologyBuilder topology) {
