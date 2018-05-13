@@ -113,14 +113,21 @@ import javax.annotation.Nullable;
 public class CrudBolt
         extends BaseStatefulBolt<InMemoryKeyValueState<String, FlowCache>>
         implements ICtrlBolt {
+    public static final String BOLT_ID = ComponentType.CRUD_BOLT.toString();
 
     public static final String FIELD_ID_FLOW_ID = Utils.FLOW_ID;
     public static final String FIELD_ID_BIFLOW = "biflow";
     public static final String FIELD_ID_MESSAGE = AbstractTopology.MESSAGE_FIELD;
+    public static final String FIELD_ID_SYNC_COMMAND = "sync_command";
+    public static final String FIELD_ID_SYNC_CAUSE = "sync_reason";
 
     public static final String STREAM_ID_CTRL = "ctrl";
     public static final Fields STREAM_FIELDS_VERIFICATION = new Fields(
             FIELD_ID_FLOW_ID, FIELD_ID_BIFLOW, FIELD_ID_MESSAGE);
+
+    public static final String STREAM_FLOW_SYNC_ID = "flow.sync";
+    public static final Fields STREAM_FLOW_SYNC_FIELDS = new Fields(
+            FIELD_ID_FLOW_ID, FIELD_ID_SYNC_COMMAND, FIELD_ID_SYNC_CAUSE, FIELD_ID_BIFLOW);
 
     /**
      * The logger.
@@ -194,6 +201,7 @@ public class CrudBolt
         outputFieldsDeclarer.declareStream(StreamType.CACHE_SYNC.toString(), AbstractTopology.fieldMessage);
         outputFieldsDeclarer.declareStream(StreamType.VERIFICATION.toString(), STREAM_FIELDS_VERIFICATION);
         outputFieldsDeclarer.declareStream(StreamType.ERROR.toString(), FlowTopology.fieldsMessageErrorType);
+        outputFieldsDeclarer.declareStream(STREAM_FLOW_SYNC_ID, STREAM_FLOW_SYNC_FIELDS);
         // FIXME(dbogun): use proper tuple format
         outputFieldsDeclarer.declareStream(STREAM_ID_CTRL, AbstractTopology.fieldMessage);
     }

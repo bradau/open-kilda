@@ -18,6 +18,8 @@ package org.openkilda.wfm.share.bolt;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -38,10 +40,13 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 @Log4j2
+@Accessors(chain = true)
 public class OrderAwareKafkaBolt<K, V> extends AbstractBolt {
-    private final long OBSOLETE_TIMEOUT = 120 * 1000;
+    @Setter
+    private long timeWindow = TimeUnit.MINUTES.toMillis(2);
 
     private final Properties producerProperties;
     private final IOrderKeyExtractor orderKeyExtractor;
@@ -113,7 +118,7 @@ public class OrderAwareKafkaBolt<K, V> extends AbstractBolt {
     }
 
     private void dropObsoleteOrderKeys() {
-        final long cutOffLine = System.currentTimeMillis() - OBSOLETE_TIMEOUT;
+        final long cutOffLine = System.currentTimeMillis() - timeWindow;
         ArrayList<Object> obsolete = new ArrayList<>(512);
         partitionsMapping.forEach((key, payload) -> {
             if (payload.isUsedBeforeThan(cutOffLine)) {

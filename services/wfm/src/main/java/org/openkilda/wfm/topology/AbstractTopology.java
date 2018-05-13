@@ -15,6 +15,8 @@
 
 package org.openkilda.wfm.topology;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.openkilda.messaging.Topic;
 import org.openkilda.wfm.CtrlBoltRef;
 import org.openkilda.wfm.LaunchEnvironment;
@@ -60,6 +62,8 @@ public abstract class AbstractTopology implements Topology {
     protected final PropertiesReader propertiesReader;
     protected TopologyConfig config;
     protected final String topologyName;
+
+    @Getter(AccessLevel.PROTECTED)
     private final Properties kafkaProperties;
 
     public static final String SPOUT_ID_CTRL = "ctrl.in";

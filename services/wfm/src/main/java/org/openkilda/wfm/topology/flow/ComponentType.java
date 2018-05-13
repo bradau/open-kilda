@@ -94,6 +94,9 @@ public enum ComponentType {
      */
     ERROR_BOLT,
 
+    FLOW_SYNC_ENCODER,
+    FLOW_SYNC_KAFKA_BOLT,
+
     LCM_SPOUT,
     LCM_FLOW_SYNC_BOLT,
     TOPOLOGY_ENGINE_OUTPUT,

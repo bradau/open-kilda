@@ -32,10 +32,12 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.neo4j.helpers.TimeUtil;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 public class OrderAwareKafkaBoltTest {
     private OrderAwareKafkaBolt<String, String> subject;

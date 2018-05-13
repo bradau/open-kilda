@@ -15,6 +15,8 @@
 
 package org.openkilda.wfm.topology.flow;
 
+import org.apache.storm.kafka.bolt.selector.DefaultTopicSelector;
+import org.apache.storm.topology.IRichBolt;
 import org.openkilda.messaging.ServiceType;
 import org.openkilda.messaging.Utils;
 import org.openkilda.pce.provider.Auth;
@@ -22,9 +24,12 @@ import org.openkilda.wfm.CtrlBoltRef;
 import org.openkilda.wfm.LaunchEnvironment;
 import org.openkilda.wfm.error.ConfigurationException;
 import org.openkilda.wfm.error.NameCollisionException;
+import org.openkilda.wfm.share.bolt.OrderAwareKafkaBolt;
+import org.openkilda.wfm.share.bolt.TupleToOrderKeyMapper;
 import org.openkilda.wfm.topology.AbstractTopology;
 import org.openkilda.wfm.topology.flow.bolts.CrudBolt;
 import org.openkilda.wfm.topology.flow.bolts.ErrorBolt;
+import org.openkilda.wfm.topology.flow.bolts.FlowSyncEncoder;
 import org.openkilda.wfm.topology.flow.bolts.NorthboundReplyBolt;
 import org.openkilda.wfm.topology.flow.bolts.SpeakerBolt;
 import org.openkilda.wfm.topology.flow.bolts.SplitterBolt;
@@ -260,11 +265,28 @@ public class FlowTopology extends AbstractTopology {
         createCtrlBranch(builder, ctrlTargets);
         createHealthCheckHandler(builder, ServiceType.FLOW_TOPOLOGY.getId());
 
+        // Flow status sync
+        builder.setBolt(ComponentType.FLOW_SYNC_ENCODER.toString(), new FlowSyncEncoder())
+                .fieldsGrouping(
+                        ComponentType.CRUD_BOLT.toString(), CrudBolt.STREAM_FLOW_SYNC_ID,
+                        new Fields(CrudBolt.FIELD_ID_FLOW_ID));
+
+        builder.setBolt(ComponentType.FLOW_SYNC_KAFKA_BOLT.toString(), makeFlowSyncKafkaBolt())
+                .shuffleGrouping(ComponentType.FLOW_SYNC_ENCODER.toString());
+
         // builder.setBolt(
         //         ComponentType.TOPOLOGY_ENGINE_OUTPUT.toString(), createKafkaBolt(config.getKafkaTopoEngTopic()), 1)
         //         .shuffleGrouping(ComponentType.LCM_FLOW_SYNC_BOLT.toString(), LcmFlowCacheSyncBolt.STREAM_ID_TPE);
 
         return builder.createTopology();
+    }
+
+    private IRichBolt makeFlowSyncKafkaBolt() {
+        return new OrderAwareKafkaBolt<String, String>(
+                getKafkaProperties(),
+                new TupleToOrderKeyMapper(Utils.FLOW_ID),
+                new DefaultTopicSelector(getConfig().getKafkaFlowSyncTopic()))
+        .setTimeWindow(Constants.instance.getFlowSyncOrderingWindowSize());
     }
 
     /**

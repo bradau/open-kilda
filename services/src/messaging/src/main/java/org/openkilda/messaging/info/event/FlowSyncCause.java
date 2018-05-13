@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Telstra Open Source
+ * Copyright 2018 Telstra Open Source
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-package org.openkilda.wfm.topology.flow;
+package org.openkilda.messaging.info.event;
 
-import lombok.Data;
-
-import java.util.concurrent.TimeUnit;
-
-@Data
-public class Constants {
-    public static Constants instance = new Constants();
-
-    private long verificationRequestTimeoutMillis = TimeUnit.MINUTES.toMillis(5);
-    private long flowSyncOrderingWindowSize = TimeUnit.MINUTES.toMillis(2);
+public enum FlowSyncCause {
+    EXTERNAL_REQUEST,
+    INTERNAL_REQUEST,
+    ERROR
 }
