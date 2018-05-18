@@ -12,6 +12,7 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  */
+
 package org.openkilda.atdd.staging.steps.helpers;
 
 import static java.lang.String.format;
@@ -54,19 +55,19 @@ public class FlowSetBuilder {
         flows.add(flow.buildInUniqueVlan(srcPort, destPort));
     }
 
-    class FlowBuilder {
+    public class FlowBuilder {
 
         private String flowId;
         private Switch srcSwitch;
         private Switch destSwitch;
 
-        FlowBuilder(String flowId, Switch srcSwitch, Switch destSwitch) {
+        public FlowBuilder(String flowId, Switch srcSwitch, Switch destSwitch) {
             this.flowId = flowId;
             this.srcSwitch = srcSwitch;
             this.destSwitch = destSwitch;
         }
 
-        FlowPayload buildWithAnyPortsInUniqueVlan() {
+        public FlowPayload buildWithAnyPortsInUniqueVlan() {
             // Take the switch vlan ranges as the base
             RangeSet<Integer> srcRangeSet = TreeRangeSet.create();
             srcSwitch.getOutPorts().forEach(port -> srcRangeSet.addAll(port.getVlanRange()));
@@ -111,7 +112,7 @@ public class FlowSetBuilder {
             return buildFlowPayload(srcPort, srcVlan, destPort, destVlan);
         }
 
-        FlowPayload buildInUniqueVlan(int srcPort, int destPort) {
+        public FlowPayload buildInUniqueVlan(int srcPort, int destPort) {
             RangeSet<Integer> srcRangeSet = TreeRangeSet.create();
             srcRangeSet.addAll(srcSwitch.getOutPorts().stream()
                     .filter(port -> port.getPort() == srcPort)
@@ -211,3 +212,4 @@ public class FlowSetBuilder {
         }
     }
 }
+

@@ -20,6 +20,8 @@ import org.openkilda.messaging.model.HealthCheck;
 import org.openkilda.messaging.payload.flow.FlowIdStatusPayload;
 import org.openkilda.messaging.payload.flow.FlowPathPayload;
 import org.openkilda.messaging.payload.flow.FlowPayload;
+import org.openkilda.northbound.dto.LinksDto;
+import org.openkilda.northbound.dto.SwitchDto;
 import org.openkilda.northbound.dto.flows.FlowValidationDto;
 import org.openkilda.northbound.dto.switches.RulesValidationResult;
 import org.openkilda.northbound.dto.switches.RulesSyncResult;
@@ -143,6 +145,13 @@ public class NorthboundServiceImpl implements NorthboundService {
     }
 
     @Override
+    public List<SwitchDto> getAllSwitches() {
+        SwitchDto[] flows = restTemplate.exchange("/api/v1/switches", HttpMethod.GET,
+                new HttpEntity(buildHeadersWithCorrelationId()), SwitchDto[].class).getBody();
+        return Arrays.asList(flows);
+    }
+
+    @Override
     public RulesSyncResult synchronizeSwitchRules(String switchId) {
         return restTemplate.exchange("/api/v1/switches/{switch_id}/rules/synchronize", HttpMethod.GET,
                 new HttpEntity(buildHeadersWithCorrelationId()), RulesSyncResult.class, switchId).getBody();
@@ -159,6 +168,13 @@ public class NorthboundServiceImpl implements NorthboundService {
     public RulesValidationResult validateSwitchRules(String switchId) {
         return restTemplate.exchange("/api/v1/switches/{switch_id}/rules/validate", HttpMethod.GET,
                 new HttpEntity(buildHeadersWithCorrelationId()), RulesValidationResult.class, switchId).getBody();
+    }
+
+    @Override
+    public List<LinksDto> getAllLinks() {
+        LinksDto[] flowValidations = restTemplate.exchange("/api/v1/links", HttpMethod.GET,
+                new HttpEntity(buildHeadersWithCorrelationId()), LinksDto[].class).getBody();
+        return Arrays.asList(flowValidations);
     }
 
     private HttpHeaders buildHeadersWithCorrelationId() {

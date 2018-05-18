@@ -16,6 +16,9 @@
 package org.openkilda.atdd.staging.config;
 
 import net.jodah.failsafe.RetryPolicy;
+import org.openkilda.atdd.staging.service.flowcalculator.FlowCalculator;
+import org.openkilda.atdd.staging.service.flowcalculator.FlowCalculatorImpl;
+import org.openkilda.atdd.staging.tools.LoggingRequestInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +28,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.*;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.client.support.BasicAuthorizationInterceptor;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.ResponseErrorHandler;
@@ -34,6 +38,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
@@ -76,16 +81,34 @@ public class ServiceConfig {
 
     @Bean(name = "traffExamRestTemplate")
     public RestTemplate traffExamRestTemplate() {
-        RestTemplate restTemplate = new RestTemplate();
+        RestTemplate restTemplate = buildLoggingRestTemplate("");
+        restTemplate.setErrorHandler(buildErrorHandler());
+        return restTemplate;
+    }
+
+    @Bean(name = "aSwitchRestTemplate")
+    public RestTemplate aSwitchtRestTemplate(@Value("${aswitch.endpoint}") String endpoint) {
+        return buildLoggingRestTemplate(endpoint);
+    }
+
+    @Bean
+    public FlowCalculator flowCalculator() {
+        return new FlowCalculatorImpl();
+    }
+
+    private RestTemplate buildLoggingRestTemplate(String endpoint) {
+        final RestTemplate restTemplate = new RestTemplate(new BufferingClientHttpRequestFactory(
+                new SimpleClientHttpRequestFactory()));
+        restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(endpoint));
+        List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
+        interceptors.add(new LoggingRequestInterceptor());
         restTemplate.setErrorHandler(buildErrorHandler());
         return restTemplate;
     }
 
     private RestTemplate buildRestTemplateWithAuth(String endpoint, String username, String password) {
-        final RestTemplate restTemplate = new RestTemplate();
-        restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(endpoint));
+        RestTemplate restTemplate = buildLoggingRestTemplate(endpoint);
         restTemplate.getInterceptors().add(new BasicAuthorizationInterceptor(username, password));
-        restTemplate.setErrorHandler(buildErrorHandler());
         return restTemplate;
     }
 
@@ -97,7 +120,7 @@ public class ServiceConfig {
             public void handleError(ClientHttpResponse clientHttpResponse) throws IOException {
                 try {
                     super.handleError(clientHttpResponse);
-                } catch(RestClientResponseException e) {
+                } catch (RestClientResponseException e) {
                     if (e.getRawStatusCode() != HttpStatus.NOT_FOUND.value()) {
                         LOGGER.error("HTTP response with status {} and body '{}'", e.getRawStatusCode(),
                                 e.getResponseBodyAsString());

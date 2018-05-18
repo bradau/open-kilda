@@ -5,6 +5,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -12,6 +13,8 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.mockito.stubbing.Answer;
 import org.openkilda.atdd.staging.model.topology.TopologyDefinition;
 import org.openkilda.atdd.staging.model.topology.TopologyDefinition.Switch;
+import org.openkilda.atdd.staging.service.aswitch.ASwitchService;
+import org.openkilda.atdd.staging.service.aswitch.model.ASwitchFlow;
 import org.openkilda.atdd.staging.service.floodlight.FloodlightService;
 import org.openkilda.atdd.staging.service.floodlight.model.FlowApplyActions;
 import org.openkilda.atdd.staging.service.floodlight.model.FlowEntriesMap;
@@ -22,9 +25,11 @@ import org.openkilda.atdd.staging.service.floodlight.model.MeterBand;
 import org.openkilda.atdd.staging.service.floodlight.model.MeterEntry;
 import org.openkilda.atdd.staging.service.floodlight.model.MetersEntriesMap;
 import org.openkilda.atdd.staging.service.floodlight.model.SwitchEntry;
+import org.openkilda.atdd.staging.service.flowcalculator.FlowCalculator;
 import org.openkilda.atdd.staging.service.northbound.NorthboundService;
 import org.openkilda.atdd.staging.service.topology.TopologyEngineService;
 import org.openkilda.atdd.staging.service.traffexam.TraffExamService;
+import org.openkilda.atdd.staging.service.traffexam.model.Bandwidth;
 import org.openkilda.atdd.staging.service.traffexam.model.Exam;
 import org.openkilda.atdd.staging.service.traffexam.model.ExamReport;
 import org.openkilda.atdd.staging.service.traffexam.model.Host;
@@ -44,15 +49,12 @@ import org.openkilda.northbound.dto.switches.RulesSyncResult;
 import org.openkilda.northbound.dto.switches.RulesValidationResult;
 
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
  * A factory for stub implementations of services.
- *
+ * <p>
  * This is used by unit tests to imitate correct behaviour of Kilda components.
  */
 public class StubServiceFactory {
@@ -80,7 +82,7 @@ public class StubServiceFactory {
                 });
 
         when(serviceMock.getPaths(any(), any()))
-                .thenReturn(singletonList(new PathInfoData()));
+                .thenReturn(Arrays.asList(new PathInfoData(), new PathInfoData()));
 
         when(serviceMock.getActiveSwitches())
                 .thenAnswer(invocation -> topologyDefinition.getActiveSwitches().stream()
@@ -145,6 +147,24 @@ public class StubServiceFactory {
                         .map(sw -> SwitchEntry.builder().switchId(sw.getDpId()).oFVersion(sw.getOfVersion()).build())
                         .collect(toList()));
 
+        return serviceMock;
+    }
+
+    /**
+     * Get a stub for {@link ASwitchService}. The instance is tied to the factory state.
+     */
+    public ASwitchService getASwitchStub() {
+        ASwitchService serviceMock = mock(ASwitchService.class);
+        List<ASwitchFlow> lalaland = topologyDefinition.getIslsForActiveSwitches().stream()
+                .filter(isl -> isl.getASwitch() != null)
+                .map(isl -> {
+                    TopologyDefinition.ASwitch asw = isl.getASwitch();
+                    return Arrays.asList(new ASwitchFlow(asw.getInPort(), asw.getOutPort()),
+                            new ASwitchFlow(asw.getOutPort(), asw.getInPort()));
+                }).flatMap(List::stream).collect(toList());
+
+        when(serviceMock.getAllFlows())
+                .thenReturn(lalaland);
         return serviceMock;
     }
 
@@ -286,10 +306,17 @@ public class StubServiceFactory {
                     ExamReport report = mock(ExamReport.class);
                     when(report.hasError()).thenReturn(false);
                     when(report.hasTraffic()).thenReturn(flows.containsKey(exam.getFlow().getId()));
-                    when(report.getBandwidth()).thenReturn(exam.getBandwidthLimit());
+                    when(report.getBandwidth()).thenReturn(new Bandwidth(exam.getFlow().getMaximumBandwidth()));
                     return report;
                 });
 
+        return serviceMock;
+    }
+
+    public FlowCalculator getFlowCalculatorStub() {
+        FlowCalculator serviceMock = mock(FlowCalculator.class);
+        when(serviceMock.createFlowsWithASwitch(anyInt(), anyInt(), anyInt()))
+                .thenReturn(new HashMap<>());
         return serviceMock;
     }
 }

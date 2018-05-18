@@ -56,6 +56,6 @@ public interface TopologyEngineService {
 
     String clearTopology();
 
-    List<PathInfoData> getPaths(String srcSwitch, String srcPort);
+    List<PathInfoData> getPaths(String srcSwitch, String dstSwitch);
 
 }
