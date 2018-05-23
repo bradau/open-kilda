@@ -15,7 +15,6 @@
 
 package org.openkilda.atdd.staging.config;
 
-import net.jodah.failsafe.RetryPolicy;
 import org.openkilda.atdd.staging.model.topology.TopologyDefinition;
 import org.openkilda.atdd.staging.service.StubServiceFactory;
 import org.openkilda.atdd.staging.service.aswitch.ASwitchService;
@@ -24,6 +23,8 @@ import org.openkilda.atdd.staging.service.flowcalculator.FlowCalculator;
 import org.openkilda.atdd.staging.service.northbound.NorthboundService;
 import org.openkilda.atdd.staging.service.topology.TopologyEngineService;
 import org.openkilda.atdd.staging.service.traffexam.TraffExamService;
+
+import net.jodah.failsafe.RetryPolicy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -54,7 +55,8 @@ public class StubServiceConfig {
         return factory.getTopologyEngineStub();
     }
 
-    // The retrier is used for repeating operations which depend on the system state and may change the result after delays.
+    // The retrier is used for repeating operations which depend on the system state and may change the result after
+    // delays.
     @Bean(name = "topologyEngineRetryPolicy")
     public RetryPolicy retryPolicy() {
         return new RetryPolicy()
@@ -68,7 +70,7 @@ public class StubServiceConfig {
     }
 
     @Bean(name = "aSwitchRestTemplate")
-    public ASwitchService aSwitchtRestTemplate(StubServiceFactory factory) {
+    public ASwitchService aswitchtRestTemplate(StubServiceFactory factory) {
         return factory.getASwitchStub();
     }
 

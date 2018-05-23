@@ -15,26 +15,26 @@
 
 package org.openkilda.atdd.staging.steps;
 
-import cucumber.api.java.After;
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
-import net.jodah.failsafe.Failsafe;
-import net.jodah.failsafe.RetryPolicy;
+import static org.junit.Assert.assertEquals;
+
 import org.openkilda.atdd.staging.model.topology.TopologyDefinition;
 import org.openkilda.atdd.staging.service.aswitch.ASwitchService;
 import org.openkilda.atdd.staging.service.aswitch.model.ASwitchFlow;
 import org.openkilda.atdd.staging.service.northbound.NorthboundService;
 import org.openkilda.atdd.staging.steps.helpers.TopologyUnderTest;
 import org.openkilda.messaging.info.event.IslChangeType;
-import org.openkilda.northbound.dto.PathDto;
+import org.openkilda.northbound.dto.flows.PathDto;
+
+import cucumber.api.java.After;
+import cucumber.api.java.en.Then;
+import cucumber.api.java.en.When;
+import net.jodah.failsafe.Failsafe;
+import net.jodah.failsafe.RetryPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-
 
 public class IslSteps {
 
@@ -42,7 +42,7 @@ public class IslSteps {
     private NorthboundService northboundService;
 
     @Autowired
-    private ASwitchService aSwitchService;
+    private ASwitchService aswitchService;
 
     @Autowired
     @Qualifier("topologyUnderTest")
@@ -54,30 +54,45 @@ public class IslSteps {
     @Qualifier("topologyEngineRetryPolicy")
     private RetryPolicy retryPolicy;
 
+    /**
+     * Breaks the connection of given ISL by removing rules from intermediate switch.
+     * Breaking ISL this way is not equal to physically unplugging the cable
+     * because port_down event is not being produced
+     */
     @When("ISL between switches goes down")
     public void transitIslDown() {
         topologyUnderTest.getFlowIsls().forEach((flow, isls) -> {
-            TopologyDefinition.Isl islToRemove = isls.stream().filter(isl -> isl.getASwitch() != null).findFirst().get();
-            TopologyDefinition.ASwitch aSwitch = islToRemove.getASwitch();
-            ASwitchFlow aSwFlowForward = new ASwitchFlow(aSwitch.getInPort(), aSwitch.getOutPort());
-            ASwitchFlow aSwFlowReverese = new ASwitchFlow(aSwitch.getOutPort(), aSwitch.getInPort());
-            aSwitchService.removeFlow(aSwFlowForward);
-            aSwitchService.removeFlow(aSwFlowReverese);
+            TopologyDefinition.Isl islToRemove = isls.stream().filter(isl -> isl.getAswitch() != null)
+                    .findFirst().get();
+            TopologyDefinition.ASwitch aswitch = islToRemove.getAswitch();
+            ASwitchFlow aswFlowForward = new ASwitchFlow(aswitch.getInPort(), aswitch.getOutPort());
+            ASwitchFlow aswFlowReverse = new ASwitchFlow(aswitch.getOutPort(), aswitch.getInPort());
+            aswitchService.removeFlow(aswFlowForward);
+            aswitchService.removeFlow(aswFlowReverse);
             changedIsls.add(islToRemove);
         });
     }
 
+    /**
+     * Restores rules on intermediate switch for given ISLs. This reverts the actions done by {@link #transitIslDown()}
+     */
     @When("Changed ISLs? go(?:es)? up")
     public void transitIslUp() {
         changedIsls.forEach(isl -> {
-            TopologyDefinition.ASwitch aSwitch = isl.getASwitch();
-            ASwitchFlow aSwFlowForward = new ASwitchFlow(aSwitch.getInPort(), aSwitch.getOutPort());
-            ASwitchFlow aSwFlowReverese = new ASwitchFlow(aSwitch.getOutPort(), aSwitch.getInPort());
-            aSwitchService.addFlow(aSwFlowForward);
-            aSwitchService.addFlow(aSwFlowReverese);
+            TopologyDefinition.ASwitch aswitch = isl.getAswitch();
+            ASwitchFlow aswFlowForward = new ASwitchFlow(aswitch.getInPort(), aswitch.getOutPort());
+            ASwitchFlow aswFlowReverse = new ASwitchFlow(aswitch.getOutPort(), aswitch.getInPort());
+            aswitchService.addFlow(aswFlowForward);
+            aswitchService.addFlow(aswFlowReverse);
         });
     }
 
+    /**
+     * This method waits for default amount of retries before the ISL status has the desired state.
+     * Throws assertion error otherwise. Verifications are done via Northbound.
+     *
+     * @param islStatus required ISL status
+     */
     @Then("ISLs? status changes? to (.*)")
     public void waitForIslStatus(String islStatus) {
         IslChangeType expectedIslState = IslChangeType.valueOf(islStatus);
@@ -93,7 +108,7 @@ public class IslSteps {
         });
     }
 
-    @After( {"@requires_cleanup", "@cuts_out_isls"})
+    @After({"@requires_cleanup", "@cuts_out_isls"})
     public void bringIslBack() {
         transitIslUp();
     }

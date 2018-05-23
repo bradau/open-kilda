@@ -15,11 +15,11 @@
 
 package org.openkilda.atdd.staging.steps.helpers;
 
-import lombok.Data;
 import org.openkilda.atdd.staging.model.topology.TopologyDefinition;
 import org.openkilda.messaging.payload.flow.FlowPayload;
 
-import java.util.ArrayList;
+import lombok.Data;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

@@ -20,11 +20,12 @@ import org.openkilda.messaging.model.HealthCheck;
 import org.openkilda.messaging.payload.flow.FlowIdStatusPayload;
 import org.openkilda.messaging.payload.flow.FlowPathPayload;
 import org.openkilda.messaging.payload.flow.FlowPayload;
-import org.openkilda.northbound.dto.LinksDto;
-import org.openkilda.northbound.dto.SwitchDto;
 import org.openkilda.northbound.dto.flows.FlowValidationDto;
-import org.openkilda.northbound.dto.switches.RulesValidationResult;
+import org.openkilda.northbound.dto.flows.LinksDto;
 import org.openkilda.northbound.dto.switches.RulesSyncResult;
+import org.openkilda.northbound.dto.switches.RulesValidationResult;
+import org.openkilda.northbound.dto.switches.SwitchDto;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,7 +140,8 @@ public class NorthboundServiceImpl implements NorthboundService {
         HttpHeaders httpHeaders = buildHeadersWithCorrelationId();
         httpHeaders.set(Utils.EXTRA_AUTH, String.valueOf(System.currentTimeMillis()));
 
-        Long[] deletedRules = restTemplate.exchange("/api/v1/switches/{switch_id}/rules?delete-action=IGNORE_DEFAULTS", HttpMethod.DELETE,
+        Long[] deletedRules = restTemplate.exchange(
+                "/api/v1/switches/{switch_id}/rules?delete-action=IGNORE_DEFAULTS", HttpMethod.DELETE,
                 new HttpEntity(httpHeaders), Long[].class, switchId).getBody();
         return Arrays.asList(deletedRules);
     }

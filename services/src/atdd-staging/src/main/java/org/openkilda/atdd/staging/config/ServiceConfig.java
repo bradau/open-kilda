@@ -15,10 +15,11 @@
 
 package org.openkilda.atdd.staging.config;
 
-import net.jodah.failsafe.RetryPolicy;
 import org.openkilda.atdd.staging.service.flowcalculator.FlowCalculator;
 import org.openkilda.atdd.staging.service.flowcalculator.FlowCalculatorImpl;
 import org.openkilda.atdd.staging.tools.LoggingRequestInterceptor;
+
+import net.jodah.failsafe.RetryPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +29,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.client.*;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.client.support.BasicAuthorizationInterceptor;
 import org.springframework.web.client.DefaultResponseErrorHandler;
@@ -71,7 +74,8 @@ public class ServiceConfig {
         return buildRestTemplateWithAuth(endpoint, username, password);
     }
 
-    // The retrier is used for repeating operations which depend on the system state and may change the result after delays.
+    // The retrier is used for repeating operations which depend on the system state and may change the result
+    // after delays.
     @Bean(name = "topologyEngineRetryPolicy")
     public RetryPolicy retryPolicy() {
         return new RetryPolicy()
@@ -87,7 +91,7 @@ public class ServiceConfig {
     }
 
     @Bean(name = "aSwitchRestTemplate")
-    public RestTemplate aSwitchtRestTemplate(@Value("${aswitch.endpoint}") String endpoint) {
+    public RestTemplate aswitchtRestTemplate(@Value("${aswitch.endpoint}") String endpoint) {
         return buildLoggingRestTemplate(endpoint);
     }
 
@@ -114,7 +118,7 @@ public class ServiceConfig {
 
     private ResponseErrorHandler buildErrorHandler() {
         return new DefaultResponseErrorHandler() {
-            private final Logger LOGGER = LoggerFactory.getLogger(ResponseErrorHandler.class);
+            private final Logger logger = LoggerFactory.getLogger(ResponseErrorHandler.class);
 
             @Override
             public void handleError(ClientHttpResponse clientHttpResponse) throws IOException {
@@ -122,7 +126,7 @@ public class ServiceConfig {
                     super.handleError(clientHttpResponse);
                 } catch (RestClientResponseException e) {
                     if (e.getRawStatusCode() != HttpStatus.NOT_FOUND.value()) {
-                        LOGGER.error("HTTP response with status {} and body '{}'", e.getRawStatusCode(),
+                        logger.error("HTTP response with status {} and body '{}'", e.getRawStatusCode(),
                                 e.getResponseBodyAsString());
                     }
                     throw e;

@@ -15,7 +15,8 @@
 
 package org.openkilda.atdd.staging.service.flowcalculator;
 
-import org.junit.Assume;
+import static java.lang.String.format;
+
 import org.openkilda.atdd.staging.model.topology.TopologyDefinition;
 import org.openkilda.atdd.staging.service.northbound.NorthboundService;
 import org.openkilda.atdd.staging.service.topology.TopologyEngineService;
@@ -23,14 +24,19 @@ import org.openkilda.atdd.staging.steps.helpers.FlowSetBuilder;
 import org.openkilda.messaging.info.event.PathInfoData;
 import org.openkilda.messaging.info.event.PathNode;
 import org.openkilda.messaging.payload.flow.FlowPayload;
+
+import org.junit.Assume;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
-
-import static java.lang.String.format;
 
 @Service
 public class FlowCalculatorImpl implements FlowCalculator {
@@ -57,7 +63,8 @@ public class FlowCalculatorImpl implements FlowCalculator {
      * @return map. Key: created flow. Value: list of a-switch isls for flow.
      */
     @Override
-    public Map<FlowPayload, List<TopologyDefinition.Isl>> createFlowsWithASwitch(int flowsAmount, int alternatePaths, int bw) {
+    public Map<FlowPayload, List<TopologyDefinition.Isl>> createFlowsWithASwitch(int flowsAmount,
+                                                                                 int alternatePaths, int bw) {
 
         final List<TopologyDefinition.Switch> switches = topologyDefinition.getActiveSwitches();
         FlowSetBuilder flowSet = new FlowSetBuilder();
@@ -77,8 +84,10 @@ public class FlowCalculatorImpl implements FlowCalculator {
                 boolean hasAlternatePath = forwardPaths.size() > alternatePaths && reversePaths.size() > alternatePaths;
                 if (hasAlternatePath) {
                     //try creating flow to see the actual path being used
-                    String flowId = format("%s-%s-%s", srcSwitch.getName(), dstSwitch.getName(), sdf.format(new Date()));
-                    FlowPayload flow = flowSet.new FlowBuilder(flowId, srcSwitch, dstSwitch).buildWithAnyPortsInUniqueVlan();
+                    String flowId = format("%s-%s-%s", srcSwitch.getName(), dstSwitch.getName(),
+                            sdf.format(new Date()));
+                    FlowPayload flow = flowSet.new FlowBuilder(flowId, srcSwitch, dstSwitch)
+                            .buildWithAnyPortsInUniqueVlan();
                     flow.setMaximumBandwidth(bw);
                     northboundService.addFlow(flow);
                     List<PathNode> path = northboundService.getFlowPath(flowId).getPath().getPath();
@@ -87,9 +96,9 @@ public class FlowCalculatorImpl implements FlowCalculator {
                         PathNode from = path.get(i - 1);
                         PathNode to = path.get(i);
                         isls.addAll(topologyDefinition.getIslsForActiveSwitches().stream().filter(isl ->
-                                isl.getSrcSwitch().getDpId().equals(from.getSwitchId()) &&
-                                        isl.getDstSwitch().getDpId().equals(to.getSwitchId()) &&
-                                        isl.getASwitch() != null).collect(Collectors.toList()));
+                                isl.getSrcSwitch().getDpId().equals(from.getSwitchId())
+                                        && isl.getDstSwitch().getDpId().equals(to.getSwitchId())
+                                        && isl.getAswitch() != null).collect(Collectors.toList()));
                     }
                     if (isls.isEmpty()) { //created flow has no aswitch links, doesn't work for us
                         northboundService.deleteFlow(flowId);
@@ -123,7 +132,8 @@ public class FlowCalculatorImpl implements FlowCalculator {
         FlowSetBuilder builder = new FlowSetBuilder();
 
         final List<TopologyDefinition.Switch> switches = topologyDefinition.getActiveSwitches();
-        // check each combination of active switches for a path between them and create a flow definition if the path exists
+        // check each combination of active switches for a path between them and create
+        // a flow definition if the path exists
         switches.forEach(srcSwitch ->
                 switches.forEach(dstSwitch -> {
                     // skip the same switch flow and reverse combination of switches

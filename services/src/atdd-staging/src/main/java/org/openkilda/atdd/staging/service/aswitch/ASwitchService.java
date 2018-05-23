@@ -15,7 +15,6 @@
 
 package org.openkilda.atdd.staging.service.aswitch;
 
-
 import org.openkilda.atdd.staging.service.aswitch.model.ASwitchFlow;
 
 import java.util.List;

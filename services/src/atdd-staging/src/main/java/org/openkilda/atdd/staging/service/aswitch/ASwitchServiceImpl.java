@@ -16,6 +16,7 @@
 package org.openkilda.atdd.staging.service.aswitch;
 
 import org.openkilda.atdd.staging.service.aswitch.model.ASwitchFlow;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ import java.util.List;
 
 /**
  * This service takes control over the intermediate 'A Switch' in Staging which is meant to allow to
- * disconnect ISLs
+ * disconnect ISLs.
  */
 @Service
 public class ASwitchServiceImpl implements ASwitchService {

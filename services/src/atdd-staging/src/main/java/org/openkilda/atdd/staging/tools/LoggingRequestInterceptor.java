@@ -15,9 +15,7 @@
 
 package org.openkilda.atdd.staging.tools;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import static java.lang.String.format;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -30,13 +28,16 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 
-import static java.lang.String.format;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class LoggingRequestInterceptor implements ClientHttpRequestInterceptor {
-    private final static Logger log = LoggerFactory.getLogger(LoggingRequestInterceptor.class);
+    private static final Logger log = LoggerFactory.getLogger(LoggingRequestInterceptor.class);
 
     @Override
-    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+            throws IOException {
         traceRequest(request, body);
         ClientHttpResponse response = execution.execute(request, body);
         traceResponse(response);
@@ -57,9 +58,9 @@ public class LoggingRequestInterceptor implements ClientHttpRequestInterceptor {
             inputStringBuilder.append('\n');
             line = bufferedReader.readLine();
         }
-        log.debug(format("\n%s response begin %1$s\n" +
-                        "Status code  : %s\nStatus text  : %s\nHeaders      : %s\nResponse body: %s\n" +
-                        "%1$s response end %1$s", Strings.repeat("=", 20),
+        log.debug(format("\n%s response begin %1$s\n"
+                        + "Status code  : %s\nStatus text  : %s\nHeaders      : %s\nResponse body: %s\n"
+                        + "%1$s response end %1$s", Strings.repeat("=", 20),
                 response.getStatusCode(), response.getStatusText(), response.getHeaders(),
                 toJson(inputStringBuilder.toString())));
     }

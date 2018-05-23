@@ -183,7 +183,7 @@ public class TopologyDefinition {
         private Switch dstSwitch;
         private int dstPort;
         private long maxBandwidth;
-        private ASwitch aSwitch;
+        private ASwitch aswitch;
 
         @JsonCreator
         public static Isl factory(
@@ -192,8 +192,8 @@ public class TopologyDefinition {
                 @JsonProperty("dst_switch") Switch dstSwitch,
                 @JsonProperty("dst_port") int dstPort,
                 @JsonProperty("max_bandwidth") long maxBandwidth,
-                @JsonProperty("a_switch") ASwitch aSwitch) {
-            return new Isl(srcSwitch, srcPort, dstSwitch, dstPort, maxBandwidth, aSwitch);
+                @JsonProperty("a_switch") ASwitch aswitch) {
+            return new Isl(srcSwitch, srcPort, dstSwitch, dstPort, maxBandwidth, aswitch);
         }
     }
 

@@ -16,13 +16,10 @@
 package org.openkilda.atdd.staging.config;
 
 import org.openkilda.atdd.staging.steps.helpers.TopologyUnderTest;
-import org.openkilda.messaging.payload.flow.FlowPayload;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Configuration
 @ComponentScan(basePackages = {"org.openkilda.atdd.staging.steps"})

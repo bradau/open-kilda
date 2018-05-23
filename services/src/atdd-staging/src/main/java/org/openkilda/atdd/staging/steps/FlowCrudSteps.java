@@ -33,14 +33,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.common.annotations.VisibleForTesting;
-import cucumber.api.java.en.And;
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
-import cucumber.api.java8.En;
-import net.jodah.failsafe.Failsafe;
-import net.jodah.failsafe.RetryPolicy;
 import org.apache.commons.collections4.ListValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.openkilda.atdd.staging.model.topology.TopologyDefinition;
@@ -65,6 +57,15 @@ import org.openkilda.messaging.payload.flow.FlowIdStatusPayload;
 import org.openkilda.messaging.payload.flow.FlowPayload;
 import org.openkilda.messaging.payload.flow.FlowState;
 import org.openkilda.northbound.dto.flows.FlowValidationDto;
+
+import com.google.common.annotations.VisibleForTesting;
+import cucumber.api.java.en.And;
+import cucumber.api.java.en.Given;
+import cucumber.api.java.en.Then;
+import cucumber.api.java.en.When;
+import cucumber.api.java8.En;
+import net.jodah.failsafe.Failsafe;
+import net.jodah.failsafe.RetryPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,7 +121,8 @@ public class FlowCrudSteps implements En {
         flows = flowCalculator.allActiveTraffgenFlows();
     }
 
-    @Given("Create (\\d+) flows? with A Switch used and at least (\\d+) alternate paths? between source and destination switch and (\\d+) bandwidth")
+    @Given("Create (\\d+) flows? with A Switch used and at least (\\d+) alternate paths? between source and "
+            + "destination switch and (\\d+) bandwidth")
     public void flowsWithAlternatePaths(int flowsAmount, int alternatePaths, int bw) {
         topologyUnderTest.getFlowIsls().putAll(flowCalculator.createFlowsWithASwitch(flowsAmount, alternatePaths, bw));
         //temporary resaving flows before refactoring all methods to work with topologyUnderTest
@@ -222,9 +224,10 @@ public class FlowCrudSteps implements En {
             List<FlowValidationDto> validations = northboundService.validateFlow(flow.getId());
             validations.forEach(flowValidation -> {
                 assertEquals(flow.getId(), flowValidation.getFlowId());
-                assertTrue(format("The flow '%s' has discrepancies: %s", flow.getId(), flowValidation.getDiscrepancies()),
-                        flowValidation.getDiscrepancies().isEmpty());
-                assertTrue(format("The flow '%s' didn't pass validation.", flow.getId()), flowValidation.getAsExpected());
+                assertTrue(format("The flow '%s' has discrepancies: %s", flow.getId(),
+                        flowValidation.getDiscrepancies()), flowValidation.getDiscrepancies().isEmpty());
+                assertTrue(format("The flow '%s' didn't pass validation.", flow.getId()),
+                        flowValidation.getAsExpected());
             });
 
         });

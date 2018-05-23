@@ -9,8 +9,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.apache.commons.lang3.SerializationUtils;
-import org.mockito.stubbing.Answer;
 import org.openkilda.atdd.staging.model.topology.TopologyDefinition;
 import org.openkilda.atdd.staging.model.topology.TopologyDefinition.Switch;
 import org.openkilda.atdd.staging.service.aswitch.ASwitchService;
@@ -48,13 +46,19 @@ import org.openkilda.messaging.payload.flow.FlowState;
 import org.openkilda.northbound.dto.switches.RulesSyncResult;
 import org.openkilda.northbound.dto.switches.RulesValidationResult;
 
+import org.apache.commons.lang3.SerializationUtils;
+import org.mockito.stubbing.Answer;
+
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
  * A factory for stub implementations of services.
- * <p>
  * This is used by unit tests to imitate correct behaviour of Kilda components.
  */
 public class StubServiceFactory {
@@ -156,9 +160,9 @@ public class StubServiceFactory {
     public ASwitchService getASwitchStub() {
         ASwitchService serviceMock = mock(ASwitchService.class);
         List<ASwitchFlow> lalaland = topologyDefinition.getIslsForActiveSwitches().stream()
-                .filter(isl -> isl.getASwitch() != null)
+                .filter(isl -> isl.getAswitch() != null)
                 .map(isl -> {
-                    TopologyDefinition.ASwitch asw = isl.getASwitch();
+                    TopologyDefinition.ASwitch asw = isl.getAswitch();
                     return Arrays.asList(new ASwitchFlow(asw.getInPort(), asw.getOutPort()),
                             new ASwitchFlow(asw.getOutPort(), asw.getInPort()));
                 }).flatMap(List::stream).collect(toList());
@@ -175,8 +179,8 @@ public class StubServiceFactory {
         FlowEntry flowEntry = buildFlowEntry("flow-0x8000000000000002",
                 FlowMatchField.builder().ethDst("08:ed:02:ef:ff:ff").build(),
                 FlowInstructions.builder().applyActions(
-                        FlowApplyActions.builder().
-                                flowOutput("controller").field(switchId + "->eth_dst").build()
+                        FlowApplyActions.builder()
+                                .flowOutput("controller").field(switchId + "->eth_dst").build()
                 ).build()
         );
         result.put(flowEntry.getCookie(), flowEntry);
@@ -194,9 +198,9 @@ public class StubServiceFactory {
             FlowEntry flowFor13Version = buildFlowEntry("flow-0x8000000000000003",
                     FlowMatchField.builder().ethDst(switchId).build(),
                     FlowInstructions.builder().applyActions(
-                            FlowApplyActions.builder().
-                                    flowOutput("controller").
-                                    field(switchId + "->eth_dst")
+                            FlowApplyActions.builder()
+                                    .flowOutput("controller")
+                                    .field(switchId + "->eth_dst")
                                     .build()
                     ).build()
             );
@@ -313,6 +317,9 @@ public class StubServiceFactory {
         return serviceMock;
     }
 
+    /**
+     * Get a stub for {@link FlowCalculator}. The instance is tied to the factory state.
+     */
     public FlowCalculator getFlowCalculatorStub() {
         FlowCalculator serviceMock = mock(FlowCalculator.class);
         when(serviceMock.createFlowsWithASwitch(anyInt(), anyInt(), anyInt()))
