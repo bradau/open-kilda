@@ -15,8 +15,6 @@
 
 package org.openkilda.wfm.topology.flow;
 
-import org.apache.storm.kafka.bolt.selector.DefaultTopicSelector;
-import org.apache.storm.topology.IRichBolt;
 import org.openkilda.messaging.ServiceType;
 import org.openkilda.messaging.Utils;
 import org.openkilda.pce.provider.Auth;
@@ -29,8 +27,6 @@ import org.openkilda.wfm.share.bolt.TupleToOrderKeyMapper;
 import org.openkilda.wfm.topology.AbstractTopology;
 import org.openkilda.wfm.topology.flow.bolts.CrudBolt;
 import org.openkilda.wfm.topology.flow.bolts.ErrorBolt;
-import org.openkilda.wfm.topology.flow.bolts.sync.FlowSyncAssembler;
-import org.openkilda.wfm.topology.flow.bolts.sync.FlowSyncEncoder;
 import org.openkilda.wfm.topology.flow.bolts.NorthboundReplyBolt;
 import org.openkilda.wfm.topology.flow.bolts.SpeakerBolt;
 import org.openkilda.wfm.topology.flow.bolts.SplitterBolt;
@@ -38,14 +34,18 @@ import org.openkilda.wfm.topology.flow.bolts.TopologyEngineBolt;
 import org.openkilda.wfm.topology.flow.bolts.TransactionBolt;
 import org.openkilda.wfm.topology.flow.bolts.VerificationBolt;
 import org.openkilda.wfm.topology.flow.bolts.VerificationJointBolt;
+import org.openkilda.wfm.topology.flow.bolts.sync.FlowSyncAssembler;
+import org.openkilda.wfm.topology.flow.bolts.sync.FlowSyncEncoder;
 import org.openkilda.wfm.topology.flow.bolts.sync.FlowSyncRouter;
 
 import org.apache.storm.generated.ComponentObject;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.kafka.bolt.KafkaBolt;
+import org.apache.storm.kafka.bolt.selector.DefaultTopicSelector;
 import org.apache.storm.kafka.spout.KafkaSpout;
 import org.apache.storm.kafka.spout.KafkaSpoutConfig;
 import org.apache.storm.topology.BoltDeclarer;
+import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
 import org.slf4j.Logger;
@@ -293,10 +293,9 @@ public class FlowTopology extends AbstractTopology {
 
     private IRichBolt makeFlowSyncKafkaBolt() {
         return new OrderAwareKafkaBolt<String, String>(
-                getKafkaProperties(),
-                new TupleToOrderKeyMapper(Utils.FLOW_ID),
+                getKafkaProperties(), new TupleToOrderKeyMapper(Utils.FLOW_ID),
                 new DefaultTopicSelector(getConfig().getKafkaFlowSyncTopic()))
-        .setTimeWindow(Constants.instance.getFlowSyncOrderingWindowSize());
+                .setTimeWindow(Constants.instance.getFlowSyncOrderingWindowSize());
     }
 
     /**
