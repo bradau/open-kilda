@@ -16,7 +16,6 @@ package org.openkilda.atdd.staging.steps;
 
 import static com.nitorcreations.Matchers.reflectEquals;
 import static java.lang.String.format;
-import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -33,16 +32,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.common.annotations.VisibleForTesting;
-import cucumber.api.java.en.And;
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
-import cucumber.api.java8.En;
-import net.jodah.failsafe.Failsafe;
-import net.jodah.failsafe.RetryPolicy;
-import org.apache.commons.collections4.ListValuedMap;
-import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.openkilda.atdd.staging.model.topology.TopologyDefinition;
 import org.openkilda.atdd.staging.service.floodlight.FloodlightService;
 import org.openkilda.atdd.staging.service.floodlight.model.MeterEntry;
@@ -64,6 +53,17 @@ import org.openkilda.messaging.payload.flow.FlowIdStatusPayload;
 import org.openkilda.messaging.payload.flow.FlowPayload;
 import org.openkilda.messaging.payload.flow.FlowState;
 import org.openkilda.northbound.dto.flows.FlowValidationDto;
+
+import cucumber.api.java.en.And;
+import cucumber.api.java.en.Given;
+import cucumber.api.java.en.Then;
+import cucumber.api.java.en.When;
+import cucumber.api.java8.En;
+import net.jodah.failsafe.Failsafe;
+import net.jodah.failsafe.RetryPolicy;
+import org.apache.commons.collections4.ListValuedMap;
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +72,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -99,15 +98,13 @@ public class FlowCrudSteps implements En {
     @Qualifier("topologyEngineRetryPolicy")
     private RetryPolicy retryPolicy;
 
-    @VisibleForTesting
-    Set<FlowPayload> flows = emptySet();
+    FlowSetBuilder flowSetBuilder = new FlowSetBuilder();
 
     @Given("^flows defined over active switches in the reference topology$")
     public void defineFlowsOverActiveSwitches() {
-        FlowSetBuilder builder = new FlowSetBuilder();
-
         final List<TopologyDefinition.Switch> switches = topologyDefinition.getActiveSwitches();
-        // check each combination of active switches for a path between them and create a flow definition if the path exists
+        // check each combination of active switches for a path between them and create a flow definition
+        // if the path exists
         switches.forEach(srcSwitch ->
                 switches.forEach(dstSwitch -> {
                     // skip the same switch flow and reverse combination of switches
@@ -122,18 +119,14 @@ public class FlowCrudSteps implements En {
                             .getPaths(dstSwitch.getDpId(), srcSwitch.getDpId());
                     if (!forwardPath.isEmpty() && !reversePath.isEmpty()) {
                         String flowId = format("%s-%s", srcSwitch.getName(), dstSwitch.getName());
-                        builder.addFlow(flowId, srcSwitch, dstSwitch);
+                        flowSetBuilder.addFlow(flowId, srcSwitch, dstSwitch);
                     }
                 })
         );
-
-        flows = builder.getFlows();
     }
 
     @Given("^flows defined over active traffgens in the reference topology$")
     public void defineFlowsOverActiveTraffgens() {
-        FlowSetBuilder builder = new FlowSetBuilder();
-
         final List<TopologyDefinition.TraffGen> traffGens = topologyDefinition.getActiveTraffGens();
         // check each combination of active traffGens and create a flow definition
         traffGens.forEach(srcTraffGen -> {
@@ -146,31 +139,31 @@ public class FlowCrudSteps implements En {
                 }
 
                 String flowId = format("%s-%s", srcSwitch.getName(), dstSwitch.getName());
-                builder.addFlow(flowId, srcSwitch, srcTraffGen.getSwitchPort(), dstSwitch, dstTraffGen.getSwitchPort());
+                flowSetBuilder.addFlow(flowId, srcSwitch, srcTraffGen.getSwitchPort(), dstSwitch,
+                        dstTraffGen.getSwitchPort());
             });
         });
-
-        flows = builder.getFlows();
     }
 
     @And("^each flow has unique flow_id$")
     public void setUniqueFlowIdToEachFlow() {
-        flows.forEach(flow -> flow.setId(format("%s-%s", flow.getId(), UUID.randomUUID().toString())));
+        flowSetBuilder.getFlows()
+                .forEach(flow -> flow.setId(format("%s-%s", flow.getId(), UUID.randomUUID().toString())));
     }
 
     @And("^each flow has flow_id with (.*) prefix$")
     public void buildFlowIdToEachFlow(String flowIdPrefix) {
-        flows.forEach(flow -> flow.setId(format("%s-%s", flowIdPrefix, flow.getId())));
+        flowSetBuilder.getFlows().forEach(flow -> flow.setId(format("%s-%s", flowIdPrefix, flow.getId())));
     }
 
     @And("^each flow has max bandwidth set to (\\d+)$")
     public void setBandwidthToEachFlow(int bandwidth) {
-        flows.forEach(flow -> flow.setMaximumBandwidth(bandwidth));
+        flowSetBuilder.getFlows().forEach(flow -> flow.setMaximumBandwidth(bandwidth));
     }
 
     @When("^initialize creation of given flows$")
     public void creationRequestForEachFlowIsSuccessful() {
-        for (FlowPayload flow : flows) {
+        for (FlowPayload flow : flowSetBuilder.getFlows()) {
             FlowPayload result = northboundService.addFlow(flow);
             assertThat(format("A flow creation request for '%s' failed.", flow.getId()), result,
                     reflectEquals(flow, "lastUpdated", "status"));
@@ -184,7 +177,7 @@ public class FlowCrudSteps implements En {
 
     @Then("^each flow is created and stored in TopologyEngine$")
     public void eachFlowIsCreatedAndStoredInTopologyEngine() {
-        List<Flow> expextedFlows = flows.stream()
+        List<Flow> expextedFlows = flowSetBuilder.getFlows().stream()
                 .map(flow -> new Flow(flow.getId(),
                         flow.getMaximumBandwidth(),
                         flow.isIgnoreBandwidth(), 0,
@@ -211,7 +204,7 @@ public class FlowCrudSteps implements En {
 
     @And("^each flow is in UP state$")
     public void eachFlowIsInUpState() {
-        for (FlowPayload flow : flows) {
+        for (FlowPayload flow : flowSetBuilder.getFlows()) {
             FlowIdStatusPayload status = Failsafe.with(retryPolicy
                     .retryIf(p -> p == null || ((FlowIdStatusPayload) p).getStatus() != FlowState.UP))
                     .get(() -> northboundService.getFlowStatus(flow.getId()));
@@ -226,7 +219,7 @@ public class FlowCrudSteps implements En {
 
     @And("^each flow can be read from Northbound$")
     public void eachFlowCanBeReadFromNorthbound() {
-        for (FlowPayload flow : flows) {
+        for (FlowPayload flow : flowSetBuilder.getFlows()) {
             FlowPayload result = northboundService.getFlow(flow.getId());
 
             assertNotNull(format("The flow '%s' is missing in Northbound.", flow.getId()), result);
@@ -237,13 +230,14 @@ public class FlowCrudSteps implements En {
 
     @And("^each flow is valid per Northbound validation$")
     public void eachFlowIsValid() {
-        flows.forEach(flow -> {
+        flowSetBuilder.getFlows().forEach(flow -> {
             List<FlowValidationDto> validations = northboundService.validateFlow(flow.getId());
             validations.forEach(flowValidation -> {
                 assertEquals(flow.getId(), flowValidation.getFlowId());
-                assertTrue(format("The flow '%s' has discrepancies: %s", flow.getId(), flowValidation.getDiscrepancies()),
-                        flowValidation.getDiscrepancies().isEmpty());
-                assertTrue(format("The flow '%s' didn't pass validation.", flow.getId()), flowValidation.getAsExpected());
+                assertTrue(format("The flow '%s' has discrepancies: %s", flow.getId(),
+                        flowValidation.getDiscrepancies()), flowValidation.getDiscrepancies().isEmpty());
+                assertTrue(format("The flow '%s' didn't pass validation.", flow.getId()),
+                        flowValidation.getAsExpected());
             });
 
         });
@@ -290,7 +284,7 @@ public class FlowCrudSteps implements En {
     private List<Exam> buildAndStartTraffExams() {
         FlowTrafficExamBuilder examBuilder = new FlowTrafficExamBuilder(topologyDefinition, traffExam);
 
-        List<Exam> result = flows.stream()
+        List<Exam> result = flowSetBuilder.getFlows().stream()
                 .flatMap(flow -> {
                     try {
                         // Instruct TraffGen to produce traffic with maximum bandwidth.
@@ -311,31 +305,30 @@ public class FlowCrudSteps implements En {
                 })
                 .collect(toList());
 
-        LOGGER.info("{} of {} flow's traffic examination have been started", result.size(), flows.size());
+        LOGGER.info("{} of {} flow's traffic examination have been started", result.size(),
+                flowSetBuilder.getFlows().size());
 
         return result;
     }
 
-    @Then("^each flow can be updated with (\\d+) max bandwidth$")
-    public void eachFlowCanBeUpdatedWithBandwidth(int bandwidth) {
-        List<String> updatedFlowIds = new ArrayList<>();
-
-        for (FlowPayload flow : flows) {
+    @Then("^each flow can be updated with (\\d+) max bandwidth( and new vlan)?$")
+    public void eachFlowCanBeUpdatedWithBandwidth(int bandwidth, boolean newVlan) {
+        for (FlowPayload flow : flowSetBuilder.getFlows()) {
             flow.setMaximumBandwidth(bandwidth);
-
-            FlowPayload result = northboundService.updateFlow(flow.getId(), flow);
-            if (result != null) {
-                updatedFlowIds.add(result.getId());
+            if (newVlan) {
+                Integer vlan = flowSetBuilder.allocateVlan();
+                flow.getDestination().setVlanId(vlan);
+                flow.getSource().setVlanId(vlan);
             }
+            FlowPayload result = northboundService.updateFlow(flow.getId(), flow);
+            assertThat(format("A flow update request for '%s' failed.", flow.getId()), result,
+                    reflectEquals(flow, "lastUpdated", "status"));
         }
-
-        assertThat("Updated flows in Northbound don't match expected", updatedFlowIds, containsInAnyOrder(
-                flows.stream().map(flow -> equalTo(flow.getId())).collect(toList())));
     }
 
     @And("^each flow has meters installed with (\\d+) max bandwidth$")
     public void eachFlowHasMetersInstalledWithBandwidth(long bandwidth) {
-        for (FlowPayload flow : flows) {
+        for (FlowPayload flow : flowSetBuilder.getFlows()) {
             ImmutablePair<Flow, Flow> flowPair = topologyEngineService.getFlow(flow.getId());
 
             try {
@@ -362,7 +355,7 @@ public class FlowCrudSteps implements En {
     @And("^all active switches have no excessive meters installed$")
     public void noExcessiveMetersInstalledOnActiveSwitches() {
         ListValuedMap<String, Integer> switchMeters = new ArrayListValuedHashMap<>();
-        for (FlowPayload flow : flows) {
+        for (FlowPayload flow : flowSetBuilder.getFlows()) {
             ImmutablePair<Flow, Flow> flowPair = topologyEngineService.getFlow(flow.getId());
             if (flowPair != null) {
                 switchMeters.put(flowPair.getLeft().getSourceSwitch(), flowPair.getLeft().getMeterId());
@@ -394,7 +387,7 @@ public class FlowCrudSteps implements En {
     public void eachFlowCanBeDeleted() {
         List<String> deletedFlowIds = new ArrayList<>();
 
-        for (FlowPayload flow : flows) {
+        for (FlowPayload flow : flowSetBuilder.getFlows()) {
             FlowPayload result = northboundService.deleteFlow(flow.getId());
             if (result != null) {
                 deletedFlowIds.add(result.getId());
@@ -402,12 +395,12 @@ public class FlowCrudSteps implements En {
         }
 
         assertThat("Deleted flows from Northbound don't match expected", deletedFlowIds, containsInAnyOrder(
-                flows.stream().map(flow -> equalTo(flow.getId())).collect(toList())));
+                flowSetBuilder.getFlows().stream().map(flow -> equalTo(flow.getId())).collect(toList())));
     }
 
     @And("^each flow can not be read from Northbound$")
     public void eachFlowCanNotBeReadFromNorthbound() {
-        for (FlowPayload flow : flows) {
+        for (FlowPayload flow : flowSetBuilder.getFlows()) {
             FlowPayload result = Failsafe.with(retryPolicy
                     .abortWhen(null)
                     .retryIf(Objects::nonNull))
@@ -419,7 +412,7 @@ public class FlowCrudSteps implements En {
 
     @And("^each flow can not be read from TopologyEngine$")
     public void eachFlowCanNotBeReadFromTopologyEngine() {
-        for (FlowPayload flow : flows) {
+        for (FlowPayload flow : flowSetBuilder.getFlows()) {
             ImmutablePair<Flow, Flow> result = Failsafe.with(retryPolicy
                     .abortWhen(null)
                     .retryIf(Objects::nonNull))

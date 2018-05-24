@@ -44,6 +44,19 @@ public class FlowSetBuilder {
         return unmodifiableSet(flows);
     }
 
+    /**
+     * Returns an unallocated vlan. The returned vlan is immediately added to the list of allocated vlans
+     */
+    public Integer allocateVlan() {
+        RangeSet<Integer> availableVlansRange = TreeRangeSet.create();
+        availableVlansRange.removeAll(allocatedVlans);
+        Integer vlan = availableVlansRange.asRanges().stream()
+                .flatMap(range -> ContiguousSet.create(range, DiscreteDomain.integers()).stream())
+                .findFirst().get();
+        allocatedVlans.add(Range.singleton(vlan));
+        return vlan;
+    }
+
     public void addFlow(String flowId, Switch srcSwitch, Switch destSwitch) {
         FlowBuilder flow = new FlowBuilder(flowId, srcSwitch, destSwitch);
         flows.add(flow.buildWithAnyPortsInUniqueVlan());

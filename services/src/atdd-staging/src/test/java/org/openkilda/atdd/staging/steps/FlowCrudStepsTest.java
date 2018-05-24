@@ -96,7 +96,7 @@ public class FlowCrudStepsTest {
         flowCrudSteps.defineFlowsOverActiveSwitches();
 
         // then
-        final Set<FlowPayload> flows = flowCrudSteps.flows;
+        final Set<FlowPayload> flows = flowCrudSteps.flowSetBuilder.getFlows();
         assertEquals(1, flows.size());
         assertThat(flows, hasItem(allOf(
                 hasProperty("source", allOf(
@@ -126,7 +126,7 @@ public class FlowCrudStepsTest {
         flowCrudSteps.defineFlowsOverActiveSwitches();
 
         // then
-        final Set<FlowPayload> flows = flowCrudSteps.flows;
+        final Set<FlowPayload> flows = flowCrudSteps.flowSetBuilder.getFlows();
         assertEquals(2, flows.size());
 
         assertThat(flows, hasItems(
@@ -163,7 +163,7 @@ public class FlowCrudStepsTest {
         flowCrudSteps.defineFlowsOverActiveSwitches();
 
         // then
-        final Set<FlowPayload> flows = flowCrudSteps.flows;
+        final Set<FlowPayload> flows = flowCrudSteps.flowSetBuilder.getFlows();
         assertEquals(0, flows.size());
     }
 
@@ -179,7 +179,7 @@ public class FlowCrudStepsTest {
         flowCrudSteps.defineFlowsOverActiveSwitches();
 
         // then
-        final Set<FlowPayload> flows = flowCrudSteps.flows;
+        final Set<FlowPayload> flows = flowCrudSteps.flowSetBuilder.getFlows();
         assertEquals(1, flows.size());
 
         assertThat(flows, hasItem(allOf(
@@ -228,7 +228,7 @@ public class FlowCrudStepsTest {
         flowCrudSteps.defineFlowsOverActiveTraffgens();
 
         // then
-        final Set<FlowPayload> flows = flowCrudSteps.flows;
+        final Set<FlowPayload> flows = flowCrudSteps.flowSetBuilder.getFlows();
         assertEquals(1, flows.size());
         assertThat(flows, hasItem(allOf(
                 hasProperty("source", allOf(
@@ -252,7 +252,7 @@ public class FlowCrudStepsTest {
         flowCrudSteps.defineFlowsOverActiveTraffgens();
 
         // then
-        final Set<FlowPayload> flows = flowCrudSteps.flows;
+        final Set<FlowPayload> flows = flowCrudSteps.flowSetBuilder.getFlows();
         assertEquals(3, flows.size());
         assertThat(flows, hasItems(
                 allOf(
