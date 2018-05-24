@@ -1,4 +1,5 @@
-/* Copyright 2018 Telstra Open Source
+/*
+ * Copyright 2018 Telstra Open Source
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -13,7 +14,7 @@
  *   limitations under the License.
  */
 
-package org.openkilda.wfm.topology.flow.bolts;
+package org.openkilda.wfm.topology.flow.bolts.sync;
 
 import static org.openkilda.messaging.Utils.MAPPER;
 
@@ -22,6 +23,7 @@ import org.openkilda.messaging.info.event.FlowSync;
 import org.openkilda.wfm.AbstractBolt;
 import org.openkilda.wfm.error.JsonEncodeException;
 import org.openkilda.wfm.topology.flow.ComponentType;
+import org.openkilda.wfm.topology.flow.bolts.CrudBolt;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.storm.kafka.bolt.mapper.FieldNameBasedTupleToKafkaMapper;

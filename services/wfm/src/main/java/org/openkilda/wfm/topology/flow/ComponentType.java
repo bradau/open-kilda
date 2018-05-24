@@ -94,6 +94,8 @@ public enum ComponentType {
      */
     ERROR_BOLT,
 
+    FLOW_SYNC_ROUTER,
+    FLOW_SYNC_ASSEMBLER,
     FLOW_SYNC_ENCODER,
     FLOW_SYNC_KAFKA_BOLT,
 

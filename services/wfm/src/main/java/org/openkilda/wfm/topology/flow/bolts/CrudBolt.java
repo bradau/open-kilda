@@ -475,9 +475,7 @@ public class CrudBolt
     }
 
     private void handleVerificationRequest(Tuple tuple, String flowId, CommandMessage message) {
-        ImmutablePair<Flow, Flow> flowPair = flowCache.getFlow(flowId);
-        BiFlow biFlow = new BiFlow(flowPair);
-
+        BidirectionalFlow biFlow = new BidirectionalFlow(flowCache.getFlow(flowId));
         outputCollector.emit(StreamType.VERIFICATION.toString(), tuple, new Values(flowId, biFlow, message));
     }
 

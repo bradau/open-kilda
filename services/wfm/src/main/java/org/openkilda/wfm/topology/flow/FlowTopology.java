@@ -29,7 +29,8 @@ import org.openkilda.wfm.share.bolt.TupleToOrderKeyMapper;
 import org.openkilda.wfm.topology.AbstractTopology;
 import org.openkilda.wfm.topology.flow.bolts.CrudBolt;
 import org.openkilda.wfm.topology.flow.bolts.ErrorBolt;
-import org.openkilda.wfm.topology.flow.bolts.FlowSyncEncoder;
+import org.openkilda.wfm.topology.flow.bolts.sync.FlowSyncAssembler;
+import org.openkilda.wfm.topology.flow.bolts.sync.FlowSyncEncoder;
 import org.openkilda.wfm.topology.flow.bolts.NorthboundReplyBolt;
 import org.openkilda.wfm.topology.flow.bolts.SpeakerBolt;
 import org.openkilda.wfm.topology.flow.bolts.SplitterBolt;
@@ -37,6 +38,7 @@ import org.openkilda.wfm.topology.flow.bolts.TopologyEngineBolt;
 import org.openkilda.wfm.topology.flow.bolts.TransactionBolt;
 import org.openkilda.wfm.topology.flow.bolts.VerificationBolt;
 import org.openkilda.wfm.topology.flow.bolts.VerificationJointBolt;
+import org.openkilda.wfm.topology.flow.bolts.sync.FlowSyncRouter;
 
 import org.apache.storm.generated.ComponentObject;
 import org.apache.storm.generated.StormTopology;
@@ -266,13 +268,21 @@ public class FlowTopology extends AbstractTopology {
         createHealthCheckHandler(builder, ServiceType.FLOW_TOPOLOGY.getId());
 
         // Flow status sync
-        builder.setBolt(ComponentType.FLOW_SYNC_ENCODER.toString(), new FlowSyncEncoder())
-                .fieldsGrouping(
-                        ComponentType.CRUD_BOLT.toString(), CrudBolt.STREAM_FLOW_SYNC_ID,
-                        new Fields(CrudBolt.FIELD_ID_FLOW_ID));
+        builder.setBolt(FlowSyncRouter.BOLT_ID, new FlowSyncRouter())
+                .setMaxTaskParallelism(1)
+                .shuffleGrouping(ComponentType.CRUD_BOLT.toString(), StreamType.CREATE.toString())
+                .shuffleGrouping(ComponentType.CRUD_BOLT.toString(), StreamType.UPDATE.toString())
+                .shuffleGrouping(ComponentType.CRUD_BOLT.toString(), StreamType.DELETE.toString())
+                .shuffleGrouping(ComponentType.CRUD_BOLT.toString(), StreamType.STATUS.toString());
+
+        builder.setBolt(FlowSyncAssembler.BOLT_ID, new FlowSyncAssembler())
+                .fieldsGrouping(FlowSyncRouter.BOLT_ID, new Fields(FlowSyncRouter.FIELD_ID_FLOW_ID));
+
+        builder.setBolt(FlowSyncEncoder.BOLT_ID, new FlowSyncEncoder())
+                .shuffleGrouping(FlowSyncAssembler.BOLT_ID);
 
         builder.setBolt(ComponentType.FLOW_SYNC_KAFKA_BOLT.toString(), makeFlowSyncKafkaBolt())
-                .shuffleGrouping(ComponentType.FLOW_SYNC_ENCODER.toString());
+                .fieldsGrouping(FlowSyncEncoder.BOLT_ID, new Fields(FlowSyncEncoder.FIELD_ID_FLOW_ID));
 
         // builder.setBolt(
         //         ComponentType.TOPOLOGY_ENGINE_OUTPUT.toString(), createKafkaBolt(config.getKafkaTopoEngTopic()), 1)
