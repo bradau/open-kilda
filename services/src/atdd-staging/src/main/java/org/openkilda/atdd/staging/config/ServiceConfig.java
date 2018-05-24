@@ -15,8 +15,8 @@
 
 package org.openkilda.atdd.staging.config;
 
-import org.openkilda.atdd.staging.service.flowcalculator.FlowCalculator;
-import org.openkilda.atdd.staging.service.flowcalculator.FlowCalculatorImpl;
+import org.openkilda.atdd.staging.service.flowcalculator.FlowManager;
+import org.openkilda.atdd.staging.service.flowcalculator.FlowManagerImpl;
 import org.openkilda.atdd.staging.tools.LoggingRequestInterceptor;
 
 import net.jodah.failsafe.RetryPolicy;
@@ -85,7 +85,7 @@ public class ServiceConfig {
 
     @Bean(name = "traffExamRestTemplate")
     public RestTemplate traffExamRestTemplate() {
-        RestTemplate restTemplate = buildLoggingRestTemplate("");
+        RestTemplate restTemplate = buildLoggingRestTemplate();
         restTemplate.setErrorHandler(buildErrorHandler());
         return restTemplate;
     }
@@ -96,14 +96,19 @@ public class ServiceConfig {
     }
 
     @Bean
-    public FlowCalculator flowCalculator() {
-        return new FlowCalculatorImpl();
+    public FlowManager flowCalculator() {
+        return new FlowManagerImpl();
     }
 
     private RestTemplate buildLoggingRestTemplate(String endpoint) {
+        final RestTemplate restTemplate = buildLoggingRestTemplate();
+        restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(endpoint));
+        return restTemplate;
+    }
+
+    private RestTemplate buildLoggingRestTemplate() {
         final RestTemplate restTemplate = new RestTemplate(new BufferingClientHttpRequestFactory(
                 new SimpleClientHttpRequestFactory()));
-        restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(endpoint));
         List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
         interceptors.add(new LoggingRequestInterceptor());
         restTemplate.setErrorHandler(buildErrorHandler());

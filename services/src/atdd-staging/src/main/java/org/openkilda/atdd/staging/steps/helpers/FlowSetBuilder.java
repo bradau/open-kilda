@@ -56,6 +56,18 @@ public class FlowSetBuilder {
         flows.add(flow.buildInUniqueVlan(srcPort, destPort));
     }
 
+    /**
+     * Creates a FlowPayload instance. Properly handles unique vlans for each new flow
+     * in current FlowSetBuilder. Uses available ports specified in config.
+     */
+    public FlowPayload buildWithAnyPortsInUniqueVlan(String flowId, Switch srcSwitch, Switch destSwitch,
+                                                     int bandwidth) {
+        FlowBuilder flowBuilder = new FlowBuilder(flowId, srcSwitch, destSwitch);
+        FlowPayload flow = flowBuilder.buildWithAnyPortsInUniqueVlan();
+        flow.setMaximumBandwidth(bandwidth);
+        return flow;
+    }
+
     public class FlowBuilder {
 
         private String flowId;
@@ -75,7 +87,7 @@ public class FlowSetBuilder {
          * Creates a FlowPayload instance. Properly handles unique vlans for each new flow
          * in current FlowSetBuilder. Uses available ports specified in config.
          */
-        public FlowPayload buildWithAnyPortsInUniqueVlan() {
+        FlowPayload buildWithAnyPortsInUniqueVlan() {
             // Take the switch vlan ranges as the base
             RangeSet<Integer> srcRangeSet = TreeRangeSet.create();
             srcSwitch.getOutPorts().forEach(port -> srcRangeSet.addAll(port.getVlanRange()));
@@ -127,7 +139,7 @@ public class FlowSetBuilder {
          * @param srcPort port number on source switch
          * @param destPort port number on destination switch
          */
-        public FlowPayload buildInUniqueVlan(int srcPort, int destPort) {
+        FlowPayload buildInUniqueVlan(int srcPort, int destPort) {
             RangeSet<Integer> srcRangeSet = TreeRangeSet.create();
             srcRangeSet.addAll(srcSwitch.getOutPorts().stream()
                     .filter(port -> port.getPort() == srcPort)

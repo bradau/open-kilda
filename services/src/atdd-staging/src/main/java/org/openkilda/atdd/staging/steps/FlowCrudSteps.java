@@ -39,7 +39,7 @@ import org.openkilda.atdd.staging.model.topology.TopologyDefinition;
 import org.openkilda.atdd.staging.service.floodlight.FloodlightService;
 import org.openkilda.atdd.staging.service.floodlight.model.MeterEntry;
 import org.openkilda.atdd.staging.service.floodlight.model.MetersEntriesMap;
-import org.openkilda.atdd.staging.service.flowcalculator.FlowCalculator;
+import org.openkilda.atdd.staging.service.flowcalculator.FlowManager;
 import org.openkilda.atdd.staging.service.northbound.NorthboundService;
 import org.openkilda.atdd.staging.service.topology.TopologyEngineService;
 import org.openkilda.atdd.staging.service.traffexam.FlowNotApplicableException;
@@ -73,6 +73,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -98,7 +99,7 @@ public class FlowCrudSteps implements En {
     private TraffExamService traffExam;
 
     @Autowired
-    private FlowCalculator flowCalculator;
+    private FlowManager flowManager;
 
     @Autowired
     @Qualifier("topologyEngineRetryPolicy")
@@ -113,20 +114,21 @@ public class FlowCrudSteps implements En {
 
     @Given("^flows defined over active switches in the reference topology$")
     public void defineFlowsOverActiveSwitches() {
-        flows = flowCalculator.allActiveSwitchesFlows();
+        flows = flowManager.allActiveSwitchesFlows();
     }
 
     @Given("^flows defined over active traffgens in the reference topology$")
     public void defineFlowsOverActiveTraffgens() {
-        flows = flowCalculator.allActiveTraffgenFlows();
+        flows = flowManager.allActiveTraffgenFlows();
     }
 
     @Given("Create (\\d+) flows? with A Switch used and at least (\\d+) alternate paths? between source and "
             + "destination switch and (\\d+) bandwidth")
     public void flowsWithAlternatePaths(int flowsAmount, int alternatePaths, int bw) {
-        topologyUnderTest.getFlowIsls().putAll(flowCalculator.createFlowsWithASwitch(flowsAmount, alternatePaths, bw));
+        Map<FlowPayload, List<TopologyDefinition.Isl>> flowIsls = topologyUnderTest.getFlowIsls();
+        flowIsls.putAll(flowManager.createFlowsWithASwitch(flowsAmount, alternatePaths, bw));
         //temporary resaving flows before refactoring all methods to work with topologyUnderTest
-        flows = topologyUnderTest.getFlowIsls().keySet();
+        flows = flowIsls.keySet();
     }
 
     @And("Create defined flows?")

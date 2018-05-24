@@ -5,7 +5,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -23,7 +22,6 @@ import org.openkilda.atdd.staging.service.floodlight.model.MeterBand;
 import org.openkilda.atdd.staging.service.floodlight.model.MeterEntry;
 import org.openkilda.atdd.staging.service.floodlight.model.MetersEntriesMap;
 import org.openkilda.atdd.staging.service.floodlight.model.SwitchEntry;
-import org.openkilda.atdd.staging.service.flowcalculator.FlowCalculator;
 import org.openkilda.atdd.staging.service.northbound.NorthboundService;
 import org.openkilda.atdd.staging.service.topology.TopologyEngineService;
 import org.openkilda.atdd.staging.service.traffexam.TraffExamService;
@@ -159,7 +157,7 @@ public class StubServiceFactory {
      */
     public ASwitchService getASwitchStub() {
         ASwitchService serviceMock = mock(ASwitchService.class);
-        List<ASwitchFlow> lalaland = topologyDefinition.getIslsForActiveSwitches().stream()
+        List<ASwitchFlow> aswitchFlows = topologyDefinition.getIslsForActiveSwitches().stream()
                 .filter(isl -> isl.getAswitch() != null)
                 .map(isl -> {
                     TopologyDefinition.ASwitch asw = isl.getAswitch();
@@ -168,7 +166,7 @@ public class StubServiceFactory {
                 }).flatMap(List::stream).collect(toList());
 
         when(serviceMock.getAllFlows())
-                .thenReturn(lalaland);
+                .thenReturn(aswitchFlows);
         return serviceMock;
     }
 
@@ -314,16 +312,6 @@ public class StubServiceFactory {
                     return report;
                 });
 
-        return serviceMock;
-    }
-
-    /**
-     * Get a stub for {@link FlowCalculator}. The instance is tied to the factory state.
-     */
-    public FlowCalculator getFlowCalculatorStub() {
-        FlowCalculator serviceMock = mock(FlowCalculator.class);
-        when(serviceMock.createFlowsWithASwitch(anyInt(), anyInt(), anyInt()))
-                .thenReturn(new HashMap<>());
         return serviceMock;
     }
 }

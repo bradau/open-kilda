@@ -202,13 +202,13 @@ public class TopologyDefinition {
     public static class ASwitch {
 
         @NonNull
-        private int inPort;
-        private int outPort;
+        private Integer inPort;
+        private Integer outPort;
 
         @JsonCreator
         public static ASwitch factory(
-                @JsonProperty("in_port") int inPort,
-                @JsonProperty("out_port") int outPort) {
+                @JsonProperty("in_port") Integer inPort,
+                @JsonProperty("out_port") Integer outPort) {
             return new ASwitch(inPort, outPort);
         }
     }

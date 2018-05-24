@@ -154,21 +154,20 @@
     <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="67" checks="CustomImportOrder"/>
     <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="105" checks="JavadocMethod"/>
     <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="110" checks="LineLength"/>
-    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="124" checks="JavadocMethod"/>
-    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="133" checks="JavadocMethod"/>
-    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="153" checks="JavadocMethod"/>
-    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="167" checks="JavadocMethod"/>
-    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="194" checks="JavadocMethod"/>
-    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="210" checks="JavadocMethod"/>
-    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="221" checks="JavadocMethod"/>
-    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="236" checks="JavadocMethod"/>
-    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="258" checks="JavadocMethod"/>
-    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="299" checks="JavadocMethod"/>
-    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="316" checks="JavadocMethod"/>
-    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="342" checks="JavadocMethod"/>
-    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="373" checks="JavadocMethod"/>
-    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="388" checks="JavadocMethod"/>
-    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="400" checks="JavadocMethod"/>
+    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="125" checks="JavadocMethod"/>
+    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="155" checks="JavadocMethod"/>
+    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="169" checks="JavadocMethod"/>
+    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="196" checks="JavadocMethod"/>
+    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="212" checks="JavadocMethod"/>
+    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="223" checks="JavadocMethod"/>
+    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="238" checks="JavadocMethod"/>
+    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="260" checks="JavadocMethod"/>
+    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="301" checks="JavadocMethod"/>
+    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="318" checks="JavadocMethod"/>
+    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="344" checks="JavadocMethod"/>
+    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="375" checks="JavadocMethod"/>
+    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="390" checks="JavadocMethod"/>
+    <suppress files="src/main/java/org/openkilda/atdd/staging/steps/FlowCrudSteps.java" lines="402" checks="JavadocMethod"/>
     <suppress files="src/main/java/org/openkilda/atdd/staging/steps/helpers/DefaultFlowsChecker.java" lines="1" checks="RegexpHeader"/>
     <suppress files="src/main/java/org/openkilda/atdd/staging/steps/helpers/DefaultFlowsChecker.java" lines="5" checks="CustomImportOrder"/>
     <suppress files="src/main/java/org/openkilda/atdd/staging/steps/helpers/DefaultFlowsChecker.java" lines="6" checks="CustomImportOrder"/>
@@ -224,7 +223,7 @@
     <suppress files="src/test/java/org/openkilda/atdd/staging/config/StubServiceConfig.java" lines="23" checks="CustomImportOrder"/>
     <suppress files="src/test/java/org/openkilda/atdd/staging/config/StubServiceConfig.java" lines="24" checks="CustomImportOrder"/>
     <suppress files="src/test/java/org/openkilda/atdd/staging/config/StubServiceConfig.java" lines="55" checks="LineLength"/>
-    <suppress files="src/test/java/org/openkilda/atdd/staging/config/StubServiceConfig.java" lines="60" checks="JavadocMethod"/>
+    <suppress files="src/test/java/org/openkilda/atdd/staging/config/StubServiceConfig.java" lines="61" checks="JavadocMethod"/>
     <suppress files="src/test/java/org/openkilda/atdd/staging/config/TestTopologyConfig.java" lines="20" checks="CustomImportOrder"/>
     <suppress files="src/test/java/org/openkilda/atdd/staging/config/TestTopologyConfig.java" lines="21" checks="CustomImportOrder"/>
     <suppress files="src/test/java/org/openkilda/atdd/staging/config/TestTopologyConfig.java" lines="22" checks="CustomImportOrder"/>
@@ -247,7 +246,7 @@
     <suppress files="src/test/java/org/openkilda/atdd/staging/service/StubServiceFactory.java" lines="177" checks="SeparatorWrap"/>
     <suppress files="src/test/java/org/openkilda/atdd/staging/service/StubServiceFactory.java" lines="178" checks="SeparatorWrap"/>
     <suppress files="src/test/java/org/openkilda/atdd/staging/service/traffexam/networkpool/Inet4NetworkTest.java" lines="1" checks="RegexpHeader"/>
-    <suppress files="src/test/java/org/openkilda/atdd/staging/service/FlowCalculatorTest.java" lines="70" checks="JavadocMethod"/>
+    <suppress files="src/test/java/org/openkilda/atdd/staging/service/FlowManagerTest.java" lines="70" checks="JavadocMethod"/>
     <suppress files="src/test/java/org/openkilda/atdd/staging/tests/discovery_mechanism/DiscoveryMechanismTest.java" lines="15" checks="EmptyLineSeparator"/>
     <suppress files="src/test/java/org/openkilda/atdd/staging/tests/discovery_mechanism/DiscoveryMechanismTest.java" lines="15" checks="PackageName"/>
     <suppress files="src/test/java/org/openkilda/atdd/staging/tests/discovery_mechanism/DiscoveryMechanismTest.java" lines="21" checks="CustomImportOrder"/>
@@ -263,7 +262,7 @@
     <suppress files="src/test/java/org/openkilda/atdd/staging/tests/flow_crud/FlowCrudOverActiveSwitchesTest.java" lines="23" checks="CustomImportOrder"/>
     <suppress files="src/test/java/org/openkilda/atdd/staging/tests/flow_crud/FlowCrudOverActiveSwitchesTest.java" lines="24" checks="CustomImportOrder"/>
     <suppress files="src/test/java/org/openkilda/atdd/staging/tests/flow_crud/FlowCrudOverActiveSwitchesTest.java" lines="28" checks="CustomImportOrder"/>
-    <suppress files="src/test/java/org/openkilda/atdd/staging/tests/flow_crud/FlowCrudOverActiveSwitchesTest.java" lines="47" checks="JavadocMethod"/>
+    <suppress files="src/test/java/org/openkilda/atdd/staging/tests/flow_crud/FlowCrudOverActiveSwitchesTest.java" lines="48" checks="JavadocMethod"/>
     <suppress files="src/test/java/org/openkilda/atdd/staging/tests/monkey_suite/check_flows/MonkeySuiteCheckFlowsTest.java" lines="15" checks="EmptyLineSeparator"/>
     <suppress files="src/test/java/org/openkilda/atdd/staging/tests/monkey_suite/check_flows/MonkeySuiteCheckFlowsTest.java" lines="15" checks="PackageName"/>
     <suppress files="src/test/java/org/openkilda/atdd/staging/tests/monkey_suite/check_flows/MonkeySuiteCheckFlowsTest.java" lines="21" checks="CustomImportOrder"/>

@@ -18,13 +18,11 @@ package org.openkilda.atdd.staging.service.aswitch.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Builder;
 import lombok.Value;
 
 import java.io.Serializable;
 
-@JsonSerialize
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Value
 @Builder

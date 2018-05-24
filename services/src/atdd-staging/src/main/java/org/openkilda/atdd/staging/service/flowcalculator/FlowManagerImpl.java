@@ -39,7 +39,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class FlowCalculatorImpl implements FlowCalculator {
+public class FlowManagerImpl implements FlowManager {
     private static final SimpleDateFormat sdf = new SimpleDateFormat("ddMMMHHmm");
 
     @Autowired
@@ -59,12 +59,12 @@ public class FlowCalculatorImpl implements FlowCalculator {
      * @param flowsAmount    amount of flows to create. Will throw assumption error if unable to find enough flows in
      *                       given topology
      * @param alternatePaths amount of alternate paths that should be available for the created flows
-     * @param bw             bandwidth for created flows
+     * @param bandwidth             bandwidth for created flows
      * @return map. Key: created flow. Value: list of a-switch isls for flow.
      */
     @Override
     public Map<FlowPayload, List<TopologyDefinition.Isl>> createFlowsWithASwitch(int flowsAmount,
-                                                                                 int alternatePaths, int bw) {
+                                                                                 int alternatePaths, int bandwidth) {
 
         final List<TopologyDefinition.Switch> switches = topologyDefinition.getActiveSwitches();
         FlowSetBuilder flowSet = new FlowSetBuilder();
@@ -86,9 +86,7 @@ public class FlowCalculatorImpl implements FlowCalculator {
                     //try creating flow to see the actual path being used
                     String flowId = format("%s-%s-%s", srcSwitch.getName(), dstSwitch.getName(),
                             sdf.format(new Date()));
-                    FlowPayload flow = flowSet.new FlowBuilder(flowId, srcSwitch, dstSwitch)
-                            .buildWithAnyPortsInUniqueVlan();
-                    flow.setMaximumBandwidth(bw);
+                    FlowPayload flow = flowSet.buildWithAnyPortsInUniqueVlan(flowId, srcSwitch, dstSwitch, bandwidth);
                     northboundService.addFlow(flow);
                     List<PathNode> path = northboundService.getFlowPath(flowId).getPath().getPath();
                     List<TopologyDefinition.Isl> isls = new ArrayList<>();

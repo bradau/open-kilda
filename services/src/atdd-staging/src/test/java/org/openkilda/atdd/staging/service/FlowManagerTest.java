@@ -28,7 +28,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import org.openkilda.atdd.staging.model.topology.TopologyDefinition;
-import org.openkilda.atdd.staging.service.flowcalculator.FlowCalculatorImpl;
+import org.openkilda.atdd.staging.service.flowcalculator.FlowManagerImpl;
 import org.openkilda.atdd.staging.service.northbound.NorthboundService;
 import org.openkilda.atdd.staging.service.topology.TopologyEngineService;
 import org.openkilda.messaging.info.event.PathInfoData;
@@ -50,7 +50,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class FlowCalculatorTest {
+public class FlowManagerTest {
 
     @Mock
     private NorthboundService northboundService;
@@ -62,7 +62,7 @@ public class FlowCalculatorTest {
     private TopologyDefinition topologyDefinition;
 
     @InjectMocks
-    private FlowCalculatorImpl flowCalculator;
+    private FlowManagerImpl flowManager;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -89,7 +89,7 @@ public class FlowCalculatorTest {
                 .thenReturn(singletonList(new PathInfoData()));
 
         // when
-        final Set<FlowPayload> flows = flowCalculator.allActiveSwitchesFlows();
+        final Set<FlowPayload> flows = flowManager.allActiveSwitchesFlows();
 
         // then
         assertEquals(1, flows.size());
@@ -118,7 +118,7 @@ public class FlowCalculatorTest {
                 .thenReturn(singletonList(new PathInfoData()));
 
         // when
-        final Set<FlowPayload> flows = flowCalculator.allActiveSwitchesFlows();
+        final Set<FlowPayload> flows = flowManager.allActiveSwitchesFlows();
 
         // then
         assertEquals(2, flows.size());
@@ -154,7 +154,7 @@ public class FlowCalculatorTest {
                 .thenReturn(singletonList(new PathInfoData()));
 
         // when
-        final Set<FlowPayload> flows = flowCalculator.allActiveSwitchesFlows();
+        final Set<FlowPayload> flows = flowManager.allActiveSwitchesFlows();
 
         // then
         assertEquals(0, flows.size());
@@ -169,7 +169,7 @@ public class FlowCalculatorTest {
                 .thenReturn(singletonList(new PathInfoData()));
 
         // when
-        final Set<FlowPayload> flows = flowCalculator.allActiveSwitchesFlows();
+        final Set<FlowPayload> flows = flowManager.allActiveSwitchesFlows();
 
         // then
         assertEquals(1, flows.size());
@@ -199,7 +199,7 @@ public class FlowCalculatorTest {
         expectedException.expect(IllegalStateException.class);
 
         // when
-        flowCalculator.allActiveSwitchesFlows();
+        flowManager.allActiveSwitchesFlows();
 
         // then
         fail();
@@ -217,7 +217,7 @@ public class FlowCalculatorTest {
         when(topologyDefinition.getActiveTraffGens()).thenReturn(activeTraffGens);
 
         // when
-        final Set<FlowPayload> flows = flowCalculator.allActiveTraffgenFlows();
+        final Set<FlowPayload> flows = flowManager.allActiveTraffgenFlows();
 
         // then
         assertEquals(1, flows.size());
@@ -240,7 +240,7 @@ public class FlowCalculatorTest {
         when(topologyDefinition.getActiveTraffGens()).thenReturn(activeTraffGens);
 
         // when
-        final Set<FlowPayload> flows = flowCalculator.allActiveTraffgenFlows();
+        final Set<FlowPayload> flows = flowManager.allActiveTraffgenFlows();
 
         // then
         assertEquals(3, flows.size());

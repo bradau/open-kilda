@@ -22,8 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public interface FlowCalculator {
-    Map<FlowPayload, List<TopologyDefinition.Isl>> createFlowsWithASwitch(int flowsAmount, int alternatePaths, int bw);
+public interface FlowManager {
+    Map<FlowPayload, List<TopologyDefinition.Isl>> createFlowsWithASwitch(int flowsAmount, int alternatePaths,
+                                                                          int bandwidth);
 
     Set<FlowPayload> allActiveSwitchesFlows();
 
