@@ -271,9 +271,9 @@ public class FlowTopology extends AbstractTopology {
         builder.setBolt(FlowSyncRouter.BOLT_ID, new FlowSyncRouter())
                 .setMaxTaskParallelism(1)
                 .shuffleGrouping(ComponentType.CRUD_BOLT.toString(), StreamType.CREATE.toString())
-                .shuffleGrouping(ComponentType.CRUD_BOLT.toString(), StreamType.UPDATE.toString())
+                /*.shuffleGrouping(ComponentType.CRUD_BOLT.toString(), StreamType.UPDATE.toString())
                 .shuffleGrouping(ComponentType.CRUD_BOLT.toString(), StreamType.DELETE.toString())
-                .shuffleGrouping(ComponentType.CRUD_BOLT.toString(), StreamType.STATUS.toString());
+                .shuffleGrouping(ComponentType.CRUD_BOLT.toString(), StreamType.STATUS.toString())*/;
 
         builder.setBolt(FlowSyncAssembler.BOLT_ID, new FlowSyncAssembler())
                 .fieldsGrouping(FlowSyncRouter.BOLT_ID, new Fields(FlowSyncRouter.FIELD_ID_FLOW_ID));

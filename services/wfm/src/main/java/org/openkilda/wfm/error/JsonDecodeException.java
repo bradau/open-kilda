@@ -13,25 +13,24 @@
  *   limitations under the License.
  */
 
-package org.openkilda.wfm.topology.flow.bolts.sync;
+package org.openkilda.wfm.error;
 
-import org.openkilda.wfm.AbstractBolt;
-import org.openkilda.wfm.error.AbstractException;
-import org.openkilda.wfm.topology.flow.ComponentType;
+import lombok.Getter;
 
-import org.apache.storm.topology.OutputFieldsDeclarer;
-import org.apache.storm.tuple.Tuple;
+public class JsonDecodeException extends AbstractException {
+    @Getter
+    private final Class<?> klass;
 
-public class FlowSyncAssembler extends AbstractBolt {
-    public static final String BOLT_ID = ComponentType.FLOW_SYNC_ASSEMBLER.toString();
+    @Getter
+    private final String json;
 
-    @Override
-    protected void handleInput(Tuple input) throws AbstractException {
-
+    public JsonDecodeException(Class<?> klass, String json, Throwable throwable) {
+        super(formatMessage(klass, throwable), throwable);
+        this.klass = klass;
+        this.json = json;
     }
 
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-
+    private static String formatMessage(Class<?> klass, Throwable e) {
+        return String.format("Can\'t decode object %s from JSON representation: %s", klass.getName(), e);
     }
 }
