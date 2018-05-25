@@ -26,4 +26,5 @@ public class Constants {
 
     private long verificationRequestTimeoutMillis = TimeUnit.MINUTES.toMillis(5);
     private long flowSyncOrderingWindowSize = TimeUnit.MINUTES.toMillis(2);
+    private long flowCrudOperationTimeout = TimeUnit.MINUTES.toMillis(5);
 }

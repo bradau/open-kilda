@@ -19,6 +19,5 @@ package org.openkilda.messaging.info.event;
 public enum FlowSyncCommand {
     CREATE,
     UPDATE,
-    UPDATE_STATUS,
     DELETE
 }

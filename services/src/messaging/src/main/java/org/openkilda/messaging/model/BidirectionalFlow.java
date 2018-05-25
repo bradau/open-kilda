@@ -16,6 +16,8 @@
 
 package org.openkilda.messaging.model;
 
+import org.openkilda.messaging.payload.flow.FlowState;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
@@ -25,6 +27,9 @@ import lombok.Value;
 public class BidirectionalFlow {
     @JsonProperty("flow_id")
     private String flowId;
+
+    @JsonProperty("state")
+    private FlowState state;
 
     // FIXME(surabujin): String field is worse possible representation of time
     // private String lastUpdated;
@@ -40,7 +45,7 @@ public class BidirectionalFlow {
     @JsonProperty("description")
     private String description;
 
-    @JsonProperty("fowrard")
+    @JsonProperty("forward")
     private Flow forward;
 
     @JsonProperty("reverse")
@@ -52,6 +57,7 @@ public class BidirectionalFlow {
 
     public BidirectionalFlow(Flow forward, Flow reverse) {
         flowId = forward.getFlowId();
+        state = forward.getState();
         bandwidth = forward.getBandwidth();
         ignoreBandwidth = forward.isIgnoreBandwidth();
         cookie = forward.getFlagglessCookie();
@@ -65,6 +71,7 @@ public class BidirectionalFlow {
     @JsonCreator
     public BidirectionalFlow(
             @JsonProperty("flow_id")  String flowId,
+            @JsonProperty("state") FlowState state,
             @JsonProperty("bandwidth") int bandwidth,
             @JsonProperty("ignore_bandwidth") boolean ignoreBandwidth,
             @JsonProperty("cookie") long cookie,
@@ -72,6 +79,7 @@ public class BidirectionalFlow {
             @JsonProperty("forward") Flow forward,
             @JsonProperty("reverse") Flow reverse) {
         this.flowId = flowId;
+        this.state = state;
         this.bandwidth = bandwidth;
         this.ignoreBandwidth = ignoreBandwidth;
         this.cookie = cookie;

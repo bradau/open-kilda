@@ -23,6 +23,5 @@ import lombok.Value;
 @Value
 public class FlowSync extends InfoData {
     private FlowSyncCommand command;
-    private FlowSyncCause cause;
     private BidirectionalFlow flow;
 }

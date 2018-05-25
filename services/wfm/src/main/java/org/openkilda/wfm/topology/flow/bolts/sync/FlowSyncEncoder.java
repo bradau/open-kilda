@@ -1,5 +1,4 @@
-/*
- * Copyright 2018 Telstra Open Source
+/* Copyright 2018 Telstra Open Source
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -21,9 +20,10 @@ import static org.openkilda.messaging.Utils.MAPPER;
 import org.openkilda.messaging.Utils;
 import org.openkilda.messaging.info.event.FlowSync;
 import org.openkilda.wfm.AbstractBolt;
+import org.openkilda.wfm.error.AbstractException;
 import org.openkilda.wfm.error.JsonEncodeException;
+import org.openkilda.wfm.error.PipelineException;
 import org.openkilda.wfm.topology.flow.ComponentType;
-import org.openkilda.wfm.topology.flow.bolts.CrudBolt;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.storm.kafka.bolt.mapper.FieldNameBasedTupleToKafkaMapper;
@@ -42,27 +42,22 @@ public class FlowSyncEncoder extends AbstractBolt {
     public static final Fields STREAM_FIELDS = new Fields(FIELD_ID_FLOW_ID, FIELD_ID_PAYLOAD, FIELD_ID_KEY);
 
     @Override
-    protected void handleInput(Tuple input) throws JsonEncodeException {
-        String source = input.getSourceComponent();
+    protected void handleInput(Tuple input) throws AbstractException {
+        FlowSync syncRecord = decode(input);
+        emit(input, syncRecord.getFlow().getFlowId(), encode(syncRecord));
+    }
 
-        FlowSync event;
-        if (CrudBolt.BOLT_ID.equals(source)) {
-            event = assembleCrudBoltTuple(input);
-        } else {
-            unhandledInput(input);
-            return;
+    private FlowSync decode(Tuple input) throws PipelineException {
+        FlowSync record;
+        try {
+            record = (FlowSync) input.getValueByField(FlowSyncAssembler.FIELD_ID_PAYLOAD);
+        } catch (ClassCastException e) {
+            throw new PipelineException(this, input, FlowSyncAssembler.FIELD_ID_PAYLOAD, e.toString());
         }
-
-        // TODO - handle errors
-        String encodedEvent = encodeEvent(event);
-        proxyEvent(input, event.getFlow().getFlowId(), encodedEvent);
+        return record;
     }
 
-    private FlowSync assembleCrudBoltTuple(Tuple input) {
-        return null;  // TODO
-    }
-
-    private String encodeEvent(FlowSync event) throws JsonEncodeException {
+    private String encode(FlowSync event) throws JsonEncodeException {
         String json;
         try {
             json = MAPPER.writeValueAsString(event);
@@ -72,7 +67,7 @@ public class FlowSyncEncoder extends AbstractBolt {
         return json;
     }
 
-    private void proxyEvent(Tuple input, String flowId, String encodedEvent) {
+    private void emit(Tuple input, String flowId, String encodedEvent) {
         Values values = new Values(flowId, encodedEvent, null);
         getOutput().emit(input, values);
     }
