@@ -13,12 +13,14 @@ SECRET = os.environ.get("LOCK_KEEPER_SECRET")
 PORT = 22
 
 
-def execute_remote_command(command):
+def execute_remote_commands(*commands):
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(hostname=HOST, username=USER, password=SECRET, port=PORT)
-    stdin, stdout, stderr = client.exec_command(command)
-    data = stdout.read() + stderr.read()
+    data = ""
+    for command in commands:
+        stdin, stdout, stderr = client.exec_command(command)
+        data = stdout.read() + stderr.read()
     client.close()
     return data.decode('utf-8')
 
@@ -59,23 +61,36 @@ def parse_dump_flows(raw):
 
 @app.route('/flows', methods=['GET'])
 def get_flows_route():
-    flows = execute_remote_command('ovs-ofctl dump-flows br0')
+    flows = execute_remote_commands('ovs-ofctl dump-flows br0')
     return jsonify(parse_dump_flows(flows))
 
 
 @app.route('/flows', methods=['POST'])
 def post_flows_route():
     payload = request.get_json()
-    execute_remote_command(
-        'ovs-ofctl add-flow br0 in_port={in_port},actions=output={out_port}'
-            .format(**payload))
+    commands = ['ovs-ofctl add-flow br0 in_port={in_port},actions=output={out_port}'
+                .format(**flow) for flow in payload]
+    execute_remote_commands(*commands)
     return jsonify({'status': 'ok'})
 
 
 @app.route('/flows', methods=['DELETE'])
 def delete_flows_route():
     payload = request.get_json()
-    execute_remote_command(
-        'ovs-ofctl del-flows br0 in_port={in_port}'.format(**payload))
+    commands = ['ovs-ofctl del-flows br0 in_port={in_port}'.format(**flow) for flow in payload]
+    execute_remote_commands(*commands)
+    return jsonify({'status': 'ok'})
 
+
+@app.route('/ports', methods=['POST'])
+def ports_up():
+    commands = ["ovs-ofctl mod-port br0 %s up" % str(port) for port in request.get_json()]
+    execute_remote_commands(*commands)
+    return jsonify({'status': 'ok'})
+
+
+@app.route('/ports', methods=['DELETE'])
+def ports_down():
+    commands = ["ovs-ofctl mod-port br0 %s down" % str(port) for port in request.get_json()]
+    execute_remote_commands(*commands)
     return jsonify({'status': 'ok'})
