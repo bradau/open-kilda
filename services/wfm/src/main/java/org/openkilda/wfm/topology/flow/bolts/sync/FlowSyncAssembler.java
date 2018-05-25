@@ -15,8 +15,10 @@
 
 package org.openkilda.wfm.topology.flow.bolts.sync;
 
+import org.openkilda.messaging.info.flow.FlowInfoData;
 import org.openkilda.wfm.AbstractBolt;
 import org.openkilda.wfm.error.AbstractException;
+import org.openkilda.wfm.error.PipelineException;
 import org.openkilda.wfm.topology.flow.ComponentType;
 
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -27,7 +29,18 @@ public class FlowSyncAssembler extends AbstractBolt {
 
     @Override
     protected void handleInput(Tuple input) throws AbstractException {
+        FlowInfoData command = decodeCrudCommand(input);
 
+    }
+
+    private FlowInfoData decodeCrudCommand(Tuple input) throws PipelineException {
+        FlowInfoData command;
+        try {
+            command = (FlowInfoData) input.getValueByField(FlowSyncRouter.FIELD_ID_FLOW);
+        } catch (ClassCastException e) {
+            throw new PipelineException(this, input, FlowSyncRouter.FIELD_ID_FLOW, e.toString());
+        }
+        return command;
     }
 
     @Override
