@@ -11,7 +11,7 @@ Feature: Basic Topology Events
   these types of tests - ie ensure we are honoring the policies, and have the ability to overwrite
   the policies.
 
-  @MVP1.1
+  @MVP1
   Scenario: Link is Dropped
 
     Given a clean controller
@@ -19,7 +19,7 @@ Feature: Basic Topology Events
     When the controller learns the topology
     And multiple links exist between all switches
     And a link is dropped in the middle
-    Then the link disappears from the topology engine.
+    Then the link disappears from the topology engine in 60 seconds.
 
   @MVP1.1
   Scenario: Link is Added
@@ -31,7 +31,7 @@ Feature: Basic Topology Events
     When the controller learns the topology
     And multiple links exist between all switches
     And a link is added in the middle
-    Then the link appears in the topology engine.
+    Then the link appears in the topology engine in 60 seconds.
 
   @MVP1.1
   Scenario: Switch is Dropped
@@ -47,7 +47,7 @@ Feature: Basic Topology Events
   @MVP1.1
   Scenario: Switch is Added
 
-    This scenario will test switch up events after the initial discovery period.
+  This scenario will test switch up events after the initial discovery period.
 
     Given a clean controller
     And a random linear topology of 5 switches
@@ -61,7 +61,7 @@ Feature: Basic Topology Events
   @MVP1.2
   Scenario: Exercise ISL policy
 
-    This scenario tests the policy mechanisms of ISL discovery
+  This scenario tests the policy mechanisms of ISL discovery
 
     Given a clean controller
     And a random linear topology of 5 switches

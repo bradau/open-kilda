@@ -9,11 +9,12 @@ import static org.openkilda.DefaultParameters.topologyUsername;
 import static org.openkilda.DefaultParameters.trafficEndpoint;
 import static org.openkilda.flow.FlowUtils.getTimeDuration;
 
+import org.openkilda.messaging.info.event.IslInfoData;
+import org.openkilda.topo.exceptions.TopologyProcessingException;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.glassfish.jersey.client.ClientConfig;
-import org.openkilda.messaging.info.event.IslInfoData;
-import org.openkilda.topo.exceptions.TopologyProcessingException;
 
 import java.io.IOException;
 import java.util.List;
